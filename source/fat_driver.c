@@ -385,7 +385,7 @@ int _FAT_dirnext_r(struct _reent* r, DIR_ITER* it, char* filename_buf, struct st
 	if (fr == FR_OK) {
 		// Populate filename buffer if needed
 		if (filename_buf) {
-			size_t name_len = strnlen(fno->fname, NAME_MAX);
+			size_t name_len = strnlen(fno->fname, NAME_MAX < FF_LFN_BUF ? NAME_MAX : FF_LFN_BUF);
 			memcpy(filename_buf, fno->fname, name_len);
 			filename_buf[name_len] = 0;
 		}

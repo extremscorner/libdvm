@@ -22,26 +22,18 @@ bool dvmInit(bool set_app_cwdir, unsigned cache_pages, unsigned sectors_per_page
 	const DISC_INTERFACE* cardb = &__io_gcsdb;
 
 	// Try mounting SD card
-	if (dvmProbeDiscIface("sd", sd, cache_pages, sectors_per_page)) {
-		num_mounted ++;
-	}
+	num_mounted += dvmProbeMountDiscIface("sd", sd, cache_pages, sectors_per_page);
 
 #if defined(__wii__)
 	// Try mounting the first found USB drive
-	if (dvmProbeDiscIface("usb", usb, cache_pages, sectors_per_page)) {
-		num_mounted ++;
-	}
+	num_mounted += dvmProbeMountDiscIface("usb", usb, cache_pages, sectors_per_page);
 #endif
 
 	// Try mounting Card A
-	if (dvmProbeDiscIface("carda", carda, cache_pages, sectors_per_page)) {
-		num_mounted ++;
-	}
+	num_mounted += dvmProbeMountDiscIface("carda", carda, cache_pages, sectors_per_page);
 
 	// Try mounting Card B
-	if (dvmProbeDiscIface("cardb", cardb, cache_pages, sectors_per_page)) {
-		num_mounted ++;
-	}
+	num_mounted += dvmProbeMountDiscIface("cardb", cardb, cache_pages, sectors_per_page);
 
 	if (num_mounted && set_app_cwdir) {
 		// TODO

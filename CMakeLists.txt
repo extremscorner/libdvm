@@ -43,6 +43,7 @@ target_sources(dvm PRIVATE
 	source/dvm_disc.c
 	source/dvm_cache.c
 	source/dvm_volume.c
+	source/dvm_prober.c
 
 	source/fat_wrappers.c
 	source/fat_driver.c

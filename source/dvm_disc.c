@@ -85,27 +85,3 @@ void dvmDiscRemoveUser(DvmDisc* disc)
 		disc->vt->delete(disc);
 	}
 }
-
-bool dvmProbeDiscIface(const char* basename, const DISC_INTERFACE* iface, unsigned cache_pages, unsigned sectors_per_page)
-{
-	bool rc = false;
-	DvmDisc* disc = NULL;
-
-	if (iface) {
-		disc = dvmDiscCreate(iface);
-	}
-
-	if (disc && cache_pages != 0) {
-		disc = dvmDiscCacheCreate(disc, cache_pages, sectors_per_page);
-	}
-
-	if (disc) {
-		rc = dvmProbeDisc(basename, disc);
-	}
-
-	if (!rc && disc) {
-		disc->vt->delete(disc);
-	}
-
-	return rc;
-}

@@ -39,13 +39,13 @@ static DvmDisc s_dvmDiscSd = {
 	.features = FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE,
 };
 
-static bool _dvmMountCalicoDisc(const char* name, DvmDisc* disc, unsigned cache_pages, unsigned sectors_per_page)
+static DvmDisc* _dvmGetCalicoDisc(DvmDisc* disc, unsigned cache_pages, unsigned sectors_per_page)
 {
 	BlkDevice dev = (BlkDevice)disc->io_type;
 
 	// Ensure the disc is initialized and present
 	if (!blkDevInit(dev) || !blkDevIsPresent(dev)) {
-		return false;
+		return NULL;
 	}
 
 	// Populate DLDI features if needed
@@ -59,13 +59,21 @@ static bool _dvmMountCalicoDisc(const char* name, DvmDisc* disc, unsigned cache_
 	// Create disc cache
 	disc = dvmDiscCacheCreate(disc, cache_pages, sectors_per_page);
 
-	// Mount disc partitions
-	bool rc = dvmProbeDisc(name, disc);
-	if (!rc) {
-		disc->vt->delete(disc);
+	return disc;
+}
+
+static inline unsigned _dvmGetAndMountCalicoDisc(const char* name, DvmDisc* disc, unsigned cache_pages, unsigned sectors_per_page)
+{
+	unsigned num_mounted = 0;
+	disc = _dvmGetCalicoDisc(disc, cache_pages, sectors_per_page);
+	if (disc) {
+		num_mounted = dvmProbeMountDisc(name, disc);
+		if (!num_mounted) {
+			disc->vt->delete(disc);
+		}
 	}
 
-	return rc;
+	return num_mounted;
 }
 
 bool dvmInit(bool set_app_cwdir, unsigned cache_pages, unsigned sectors_per_page)
@@ -76,13 +84,11 @@ bool dvmInit(bool set_app_cwdir, unsigned cache_pages, unsigned sectors_per_page
 	blkInit();
 
 	// Try mounting DLDI
-	if (_dvmMountCalicoDisc("fat", &s_dvmDiscDldi, cache_pages, sectors_per_page)) {
-		num_mounted ++;
-	}
+	num_mounted += _dvmGetAndMountCalicoDisc("fat", &s_dvmDiscDldi, cache_pages, sectors_per_page);
 
-	// Try mounting DSi SD card
-	if (systemIsTwlMode() && _dvmMountCalicoDisc("sd", &s_dvmDiscSd, cache_pages, sectors_per_page)) {
-		num_mounted ++;
+	if (systemIsTwlMode()) {
+		// Try mounting DSi SD card
+		num_mounted += _dvmGetAndMountCalicoDisc("sd", &s_dvmDiscSd, cache_pages, sectors_per_page);
 	}
 
 	// Set current working directory if needed

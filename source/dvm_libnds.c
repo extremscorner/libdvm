@@ -11,16 +11,10 @@ bool dvmInit(bool set_app_cwdir, unsigned cache_pages, unsigned sectors_per_page
 	unsigned num_mounted = 0;
 
 	// Try mounting DLDI
-	const DISC_INTERFACE* dldi = dldiGetInternal();
-	if (dldi && dvmProbeDiscIface("fat", dldi, cache_pages, sectors_per_page)) {
-		num_mounted ++;
-	}
+	num_mounted += dvmProbeMountDiscIface("fat", dldiGetInternal(), cache_pages, sectors_per_page);
 
 	// Try mounting DSi SD card
-	const DISC_INTERFACE* sd = get_io_dsisd();
-	if (sd && dvmProbeDiscIface("sd", sd, cache_pages, sectors_per_page)) {
-		num_mounted ++;
-	}
+	num_mounted += dvmProbeMountDiscIface("sd", get_io_dsisd(), cache_pages, sectors_per_page);
 
 	// Set current working directory if needed
 	if (set_app_cwdir && num_mounted != 0) {
