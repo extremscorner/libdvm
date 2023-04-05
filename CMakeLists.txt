@@ -31,6 +31,11 @@ target_compile_options(dvm PRIVATE
 	-Wall
 )
 
+target_compile_definitions(dvm PRIVATE
+	# Disc I/O buffer alignment (should match CPU cache line size)
+	LIBDVM_BUFFER_ALIGN=32
+)
+
 target_include_directories(dvm PRIVATE
 	include
 )
