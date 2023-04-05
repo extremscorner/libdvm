@@ -4,6 +4,8 @@
 MEOW_WEAK unsigned g_dvmDefaultCachePages = 16;
 MEOW_WEAK unsigned g_dvmDefaultSectorsPerPage = 8;
 
+void _dvmSetAppWorkingDir(const char* argv0);
+
 static void _dvmDiscCalicoDummy(DvmDisc* self_)
 {
 	// Nothing
@@ -93,7 +95,10 @@ bool dvmInit(bool set_app_cwdir, unsigned cache_pages, unsigned sectors_per_page
 
 	// Set current working directory if needed
 	if (set_app_cwdir && num_mounted != 0) {
-		// XX
+		const char* argv0 = g_envNdsArgvHeader->argv[0];
+		if (argv0) {
+			_dvmSetAppWorkingDir(argv0);
+		}
 	}
 
 	return num_mounted != 0;

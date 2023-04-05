@@ -1,6 +1,8 @@
 #include <stdalign.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
+#include <unistd.h>
 #include <dvm.h>
 #include "dvm_debug.h"
 
@@ -113,4 +115,19 @@ void dvmUnmountVolume(const char* name)
 	RemoveDevice(name);
 	vol->fsdrv->umount(vol->device_data);
 	free(vol);
+}
+
+void _dvmSetAppWorkingDir(const char* argv0)
+{
+	char cwd[PATH_MAX];
+
+	const char* last_slash = strrchr(argv0, '/');
+	if (last_slash) {
+		size_t cwd_len = last_slash - argv0;
+		if ((cwd_len + 2) <= sizeof(cwd)) {
+			memcpy(cwd, argv0, cwd_len+1); // including slash
+			cwd[cwd_len+1] = 0;
+			chdir(cwd);
+		}
+	}
 }

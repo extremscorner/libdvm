@@ -6,6 +6,8 @@
 __attribute__((weak)) unsigned g_dvmDefaultCachePages = 4;
 __attribute__((weak)) unsigned g_dvmDefaultSectorsPerPage = 64;
 
+void _dvmSetAppWorkingDir(const char* argv0);
+
 bool dvmInit(bool set_app_cwdir, unsigned cache_pages, unsigned sectors_per_page)
 {
 	unsigned num_mounted = 0;
@@ -35,8 +37,9 @@ bool dvmInit(bool set_app_cwdir, unsigned cache_pages, unsigned sectors_per_page
 	// Try mounting Card B
 	num_mounted += dvmProbeMountDiscIface("cardb", cardb, cache_pages, sectors_per_page);
 
-	if (num_mounted && set_app_cwdir) {
-		// TODO
+	// Set current working directory if needed
+	if (set_app_cwdir && num_mounted != 0 && __system_argv->argvMagic == ARGV_MAGIC && __system_argv->argc >= 1) {
+		_dvmSetAppWorkingDir(__system_argv->argv[0]);
 	}
 
 	return num_mounted != 0;
