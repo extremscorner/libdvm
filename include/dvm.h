@@ -44,6 +44,7 @@ struct DvmDiscIface {
 
 struct DvmFsDriver {
 	const char* fstype;
+	const devoptab_t* dotab_template;
 	size_t device_data_sz;
 
 	bool (*mount)(devoptab_t* dotab, DvmDisc* disc, uint32_t start_sector);

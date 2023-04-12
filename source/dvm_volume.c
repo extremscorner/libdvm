@@ -57,6 +57,7 @@ bool dvmMountVolume(const char* name, DvmDisc* disc, uint32_t start_sector, cons
 	}
 
 	memset(vol, 0, vol_sz);
+	memcpy(&vol->dotab, fsdrv->dotab_template, sizeof(vol->dotab));
 	vol->dotab.name = vol->namebuf;
 	vol->dotab.deviceData = vol->device_data;
 	vol->fsdrv = fsdrv;

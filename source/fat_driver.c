@@ -29,9 +29,35 @@ static int _FAT_statvfs_r(struct _reent*, const char*, struct statvfs*);
 static int _FAT_ftruncate_r(struct _reent*, void*, off_t);
 static int _FAT_fsync_r(struct _reent*, void*);
 
+static const devoptab_t _FAT_devoptab = {
+	.structSize   = sizeof(FFFIL),
+	.open_r       = _FAT_open_r,
+	.close_r      = _FAT_close_r,
+	.write_r      = _FAT_write_r,
+	.read_r       = _FAT_read_r,
+	.seek_r       = _FAT_seek_r,
+	.fstat_r      = _FAT_fstat_r,
+	.stat_r       = _FAT_stat_r,
+	.unlink_r     = _FAT_unlink_r,
+	.chdir_r      = _FAT_chdir_r,
+	.rename_r     = _FAT_rename_r,
+	.mkdir_r      = _FAT_mkdir_r,
+	.dirStateSize = sizeof(FFDIR) + sizeof(FILINFO),
+	.diropen_r    = _FAT_diropen_r,
+	.dirreset_r   = _FAT_dirreset_r,
+	.dirnext_r    = _FAT_dirnext_r,
+	.dirclose_r   = _FAT_dirclose_r,
+	.statvfs_r    = _FAT_statvfs_r,
+	.ftruncate_r  = _FAT_ftruncate_r,
+	.fsync_r      = _FAT_fsync_r,
+	.rmdir_r      = _FAT_unlink_r, // XX: Needs FatFs mod to be more precise
+	.lstat_r      = _FAT_stat_r,
+};
+
 const DvmFsDriver g_vfatFsDriver = {
 	.fstype         = "vfat",
 	.device_data_sz = sizeof(FatVolume),
+	.dotab_template = &_FAT_devoptab,
 	.mount          = _FAT_mount,
 	.umount         = _FAT_umount,
 };
@@ -57,30 +83,6 @@ bool _FAT_mount(devoptab_t* dotab, DvmDisc* disc, uint32_t start_sector)
 	}
 
 	dvmDiscAddUser(disc);
-
-	dotab->structSize   = sizeof(FFFIL);
-	dotab->dirStateSize = sizeof(FFDIR) + sizeof(FILINFO);
-	dotab->open_r       = _FAT_open_r;
-	dotab->close_r      = _FAT_close_r;
-	dotab->write_r      = _FAT_write_r;
-	dotab->read_r       = _FAT_read_r;
-	dotab->seek_r       = _FAT_seek_r;
-	dotab->fstat_r      = _FAT_fstat_r;
-	dotab->stat_r       = _FAT_stat_r;
-	dotab->unlink_r     = _FAT_unlink_r;
-	dotab->chdir_r      = _FAT_chdir_r;
-	dotab->rename_r     = _FAT_rename_r;
-	dotab->mkdir_r      = _FAT_mkdir_r;
-	dotab->diropen_r    = _FAT_diropen_r;
-	dotab->dirreset_r   = _FAT_dirreset_r;
-	dotab->dirnext_r    = _FAT_dirnext_r;
-	dotab->dirclose_r   = _FAT_dirclose_r;
-	dotab->statvfs_r    = _FAT_statvfs_r;
-	dotab->ftruncate_r  = _FAT_ftruncate_r;
-	dotab->fsync_r      = _FAT_fsync_r;
-	dotab->rmdir_r      = _FAT_unlink_r; // XX: Needs FatFs mod to be more precise
-	dotab->lstat_r      = _FAT_stat_r;
-
 	return true;
 }
 
