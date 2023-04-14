@@ -24,7 +24,7 @@ static bool _dvmDiscCalicoWriteSectors(DvmDisc* self, const void* buffer, uint32
 }
 
 static const DvmDiscIface s_dvmDiscCalicoIface = {
-	.delete        = _dvmDiscCalicoDummy,
+	.destroy       = _dvmDiscCalicoDummy,
 	.read_sectors  = _dvmDiscCalicoReadSectors,
 	.write_sectors = _dvmDiscCalicoWriteSectors,
 	.flush         = _dvmDiscCalicoDummy,
@@ -71,7 +71,7 @@ static inline unsigned _dvmGetAndMountCalicoDisc(const char* name, DvmDisc* disc
 	if (disc) {
 		num_mounted = dvmProbeMountDisc(name, disc);
 		if (!num_mounted) {
-			disc->vt->delete(disc);
+			disc->vt->destroy(disc);
 		}
 	}
 

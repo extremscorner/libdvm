@@ -36,7 +36,7 @@ struct DvmDisc {
 };
 
 struct DvmDiscIface {
-	void (*delete)(DvmDisc* self);
+	void (*destroy)(DvmDisc* self);
 	bool (*read_sectors)(DvmDisc* self, void* buffer, uint32_t sectors, uint32_t num_sectors);
 	bool (*write_sectors)(DvmDisc* self, const void* buffer, uint32_t sectors, uint32_t num_sectors);
 	void (*flush)(DvmDisc* self);

@@ -43,7 +43,7 @@ bool fatMount(const char* name, const DISC_INTERFACE* iface, uint32_t start_sect
 	}
 
 	if (!rc && disc) {
-		disc->vt->delete(disc);
+		disc->vt->destroy(disc);
 	}
 
 	return rc;

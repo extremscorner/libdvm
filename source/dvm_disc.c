@@ -20,7 +20,7 @@ typedef struct DvmDiscWrap {
 	const DISC_INTERFACE* iface;
 } DvmDiscWrap;
 
-static void _dvmDiscWrapDelete(DvmDisc* self_)
+static void _dvmDiscWrapDestroy(DvmDisc* self_)
 {
 	free(self_);
 }
@@ -42,7 +42,7 @@ static void _dvmDiscWrapFlush(DvmDisc* self_)
 }
 
 static const DvmDiscIface s_dvmDiscWrapIface = {
-	.delete        = _dvmDiscWrapDelete,
+	.destroy       = _dvmDiscWrapDestroy,
 	.read_sectors  = _dvmDiscWrapReadSectors,
 	.write_sectors = _dvmDiscWrapWriteSectors,
 	.flush         = _dvmDiscWrapFlush,
@@ -82,6 +82,6 @@ void dvmDiscRemoveUser(DvmDisc* disc)
 {
 	// XX: Consider using atomics if available
 	if (!--disc->num_users) {
-		disc->vt->delete(disc);
+		disc->vt->destroy(disc);
 	}
 }

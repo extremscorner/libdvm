@@ -246,7 +246,7 @@ unsigned dvmProbeMountDiscIface(const char* basename, const DISC_INTERFACE* ifac
 	}
 
 	if (!num_mounted && disc) {
-		disc->vt->delete(disc);
+		disc->vt->destroy(disc);
 	}
 
 	return num_mounted;
