@@ -9,7 +9,7 @@
 typedef struct FatVolume {
 	_LOCK_T lock;
 	DvmDisc* disc;
-	uint32_t start_sector;
+	sec_t start_sector;
 
 	FATFS fs;
 } FatVolume;

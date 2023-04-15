@@ -7,7 +7,7 @@
 #include "fat_driver.h"
 #include "dvm_debug.h"
 
-static bool _FAT_mount(devoptab_t* dotab, DvmDisc* disc, uint32_t start_sector);
+static bool _FAT_mount(devoptab_t* dotab, DvmDisc* disc, sec_t start_sector);
 static void _FAT_umount(void* device_data);
 
 static int _FAT_open_r(struct _reent*, void*, const char*, int, int);
@@ -72,7 +72,7 @@ static FatVolume* _fatVolumeFromPath(const char* path)
 	return (FatVolume*)dotab->deviceData;
 }
 
-bool _FAT_mount(devoptab_t* dotab, DvmDisc* disc, uint32_t start_sector)
+bool _FAT_mount(devoptab_t* dotab, DvmDisc* disc, sec_t start_sector)
 {
 	FatVolume* vol    = (FatVolume*)dotab->deviceData;
 	vol->disc         = disc;
@@ -562,20 +562,20 @@ DSTATUS disk_status(void* pdrv)
 	return status;
 }
 
-DRESULT disk_read(void* pdrv, BYTE* buff, LBA_t sector, UINT count)
+DRESULT disk_read(void* pdrv, BYTE* buff, LBA_t sector_, UINT count)
 {
 	FatVolume* vol = (FatVolume*)pdrv;
 	DvmDisc* disc = vol->disc;
-	sector += vol->start_sector;
+	sec_t sector = vol->start_sector + (sec_t)sector_;
 
 	return disc->vt->read_sectors(disc, buff, sector, count) ? RES_OK : RES_ERROR;
 }
 
-DRESULT disk_write(void* pdrv, const BYTE* buff, LBA_t sector, UINT count)
+DRESULT disk_write(void* pdrv, const BYTE* buff, LBA_t sector_, UINT count)
 {
 	FatVolume* vol = (FatVolume*)pdrv;
 	DvmDisc* disc = vol->disc;
-	sector += vol->start_sector;
+	sec_t sector = vol->start_sector + (sec_t)sector_;
 
 	return disc->vt->write_sectors(disc, buff, sector, count) ? RES_OK : RES_ERROR;
 }

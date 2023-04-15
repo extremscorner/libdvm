@@ -36,7 +36,7 @@ bool dvmRegisterFsDriver(const DvmFsDriver* fsdrv)
 	return false;
 }
 
-bool dvmMountVolume(const char* name, DvmDisc* disc, uint32_t start_sector, const char* fstype)
+bool dvmMountVolume(const char* name, DvmDisc* disc, sec_t start_sector, const char* fstype)
 {
 	const DvmFsDriver* fsdrv = NULL;
 	for (unsigned i = 0; i < MAX_DRIVERS && s_dvmFsDrvTable[i]; i ++) {

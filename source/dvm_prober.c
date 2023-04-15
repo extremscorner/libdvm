@@ -118,7 +118,7 @@ static unsigned _dvmReadPartitionTable(DvmDisc* disc, DvmPartInfo* out, unsigned
 	}
 
 	DvmMbrPartEntry* mbr_part = (DvmMbrPartEntry*)((char*)buf + 0x1be);
-	uint32_t total_used_sectors = 0;
+	sec_t total_used_sectors = 0;
 	unsigned num_parts = 0;
 	for (unsigned i = 0; i < 4 && num_parts < max_partitions; i ++) {
 		unsigned status = mbr_part[i].status;
@@ -144,7 +144,7 @@ static unsigned _dvmReadPartitionTable(DvmDisc* disc, DvmPartInfo* out, unsigned
 		memcpy(&part->num_sectors, mbr_part[i].num_sectors_le, 4);
 		part->num_sectors = le32(part->num_sectors);
 
-		uint32_t part_end = part->start_sector + part->num_sectors;
+		sec_t part_end = part->start_sector + part->num_sectors;
 		if (part_end > total_used_sectors) {
 			total_used_sectors = part_end;
 		}
@@ -153,7 +153,7 @@ static unsigned _dvmReadPartitionTable(DvmDisc* disc, DvmPartInfo* out, unsigned
 	// Validate disc size
 	dvmDebug("Disc size 0x%lx\n", disc->num_sectors);
 	dvmDebug("Det  size 0x%lx\n", total_used_sectors);
-	if (disc->num_sectors == UINT32_MAX) {
+	if (~disc->num_sectors == 0) {
 		disc->num_sectors = total_used_sectors;
 	} else if (total_used_sectors > disc->num_sectors) {
 		dvmDebug("Out of bound partitions\n");

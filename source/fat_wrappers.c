@@ -25,7 +25,7 @@ bool fatMountSimple(const char* name, const DISC_INTERFACE* iface)
 	return fatMount(name, iface, 0, g_dvmDefaultCachePages, g_dvmDefaultSectorsPerPage);
 }
 
-bool fatMount(const char* name, const DISC_INTERFACE* iface, uint32_t start_sector, unsigned cache_pages, unsigned sectors_per_page)
+bool fatMount(const char* name, const DISC_INTERFACE* iface, sec_t start_sector, unsigned cache_pages, unsigned sectors_per_page)
 {
 	bool rc = false;
 	DvmDisc* disc = NULL;

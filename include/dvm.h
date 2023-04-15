@@ -6,9 +6,8 @@
 #if defined(__gamecube__) || defined(__wii__)
 # include <ogc/disc_io.h>
 #elif (defined(NDS) || defined(__NDS__)) && defined(ARM9)
-# if __has_include(<calico/dev/dldi.h>)
-#  include <calico/dev/dldi.h>
-typedef DldiDiscIface DISC_INTERFACE;
+# if __has_include(<calico/dev/disc_io.h>)
+#  include <calico/dev/disc_io.h>
 # elif __has_include(<nds/disc_io.h>)
 #  include <nds/disc_io.h>
 # else
@@ -32,13 +31,13 @@ struct DvmDisc {
 	uint32_t io_type;
 	uint16_t features;
 	uint16_t num_users;
-	uint32_t num_sectors;
+	sec_t num_sectors;
 };
 
 struct DvmDiscIface {
 	void (*destroy)(DvmDisc* self);
-	bool (*read_sectors)(DvmDisc* self, void* buffer, uint32_t sectors, uint32_t num_sectors);
-	bool (*write_sectors)(DvmDisc* self, const void* buffer, uint32_t sectors, uint32_t num_sectors);
+	bool (*read_sectors)(DvmDisc* self, void* buffer, sec_t sectors, sec_t num_sectors);
+	bool (*write_sectors)(DvmDisc* self, const void* buffer, sec_t sectors, sec_t num_sectors);
 	void (*flush)(DvmDisc* self);
 };
 
@@ -47,7 +46,7 @@ struct DvmFsDriver {
 	const devoptab_t* dotab_template;
 	size_t device_data_sz;
 
-	bool (*mount)(devoptab_t* dotab, DvmDisc* disc, uint32_t start_sector);
+	bool (*mount)(devoptab_t* dotab, DvmDisc* disc, sec_t start_sector);
 	void (*umount)(void* device_data);
 };
 
@@ -55,8 +54,8 @@ struct DvmPartInfo {
 	uint16_t index;
 	uint16_t type;
 	const char* fstype;
-	uint32_t start_sector;
-	uint32_t num_sectors;
+	sec_t start_sector;
+	sec_t num_sectors;
 };
 
 #ifdef __cplusplus
@@ -75,7 +74,7 @@ void dvmDiscRemoveUser(DvmDisc* disc);
 
 // Volume management
 bool dvmRegisterFsDriver(const DvmFsDriver* fsdrv);
-bool dvmMountVolume(const char* name, DvmDisc* disc, uint32_t start_sector, const char* fstype);
+bool dvmMountVolume(const char* name, DvmDisc* disc, sec_t start_sector, const char* fstype);
 void dvmUnmountVolume(const char* name);
 
 // Partition table and filesystem probing
