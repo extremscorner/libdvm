@@ -1,18 +1,16 @@
 
-catnip_package(dvm DEFAULT all)
+catnip_package(dvm DEFAULT ds cube wii)
 
-catnip_add_preset(ds_calico
+catnip_add_preset(ds
 	TOOLSET    NDS
 	BUILD_TYPE Release
-	CACHE
-		DKP_NDS_PLATFORM_LIBRARY=calico
 )
 
-catnip_add_preset(ds_libnds
+catnip_add_preset(ds_old
 	TOOLSET    NDS
 	BUILD_TYPE Release
 	CACHE
-		DKP_NDS_PLATFORM_LIBRARY=libnds
+		DKP_NDS_OLD_ROOT=TRUE
 )
 
 catnip_add_preset(cube

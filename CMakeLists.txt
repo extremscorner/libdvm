@@ -55,7 +55,7 @@ target_sources(dvm PRIVATE
 )
 
 if(NINTENDO_DS)
-	if(DKP_NDS_PLATFORM_LIBRARY STREQUAL "calico")
+	if(NOT DKP_NDS_OLD_ROOT)
 		target_compile_definitions(dvm PRIVATE LIBDVM_CALICO)
 		target_sources(dvm PRIVATE source/dvm_calico.c)
 	else()
