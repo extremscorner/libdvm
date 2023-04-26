@@ -57,7 +57,8 @@ target_sources(dvm PRIVATE
 if(NINTENDO_DS)
 	if(NOT DKP_NDS_OLD_ROOT)
 		target_compile_definitions(dvm PRIVATE LIBDVM_CALICO)
-		target_sources(dvm PRIVATE source/dvm_calico.c)
+		target_sources(dvm PRIVATE source/dvm_calico.c source/nitrofs.c)
+		set(extra_install PATTERN filesystem.h)
 	else()
 		target_sources(dvm PRIVATE source/dvm_libnds.c)
 	endif()
@@ -80,5 +81,7 @@ install(
 	DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
 	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 	FILES_MATCHING
-		PATTERN *.h
+		PATTERN dvm.h
+		PATTERN fat.h
+		${extra_install}
 )
