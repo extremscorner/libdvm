@@ -85,3 +85,10 @@ install(
 		PATTERN fat.h
 		${extra_install}
 )
+
+# Install a dummy libfilesystem
+if(NINTENDO_DS)
+	add_library(filesystem STATIC include/filesystem.h)
+	set_target_properties(filesystem PROPERTIES LINKER_LANGUAGE C)
+	install(TARGETS filesystem ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+endif()
