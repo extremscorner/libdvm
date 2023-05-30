@@ -1,16 +1,9 @@
 
-catnip_package(dvm DEFAULT ds cube wii)
+catnip_package(dvm DEFAULT all)
 
 catnip_add_preset(ds
 	TOOLSET    NDS
 	BUILD_TYPE Release
-)
-
-catnip_add_preset(ds_old
-	TOOLSET    NDS
-	BUILD_TYPE Release
-	CACHE
-		DKP_NDS_OLD_ROOT=TRUE
 )
 
 catnip_add_preset(cube

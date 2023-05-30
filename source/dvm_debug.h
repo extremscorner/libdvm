@@ -2,7 +2,7 @@
 
 //#define LIBDVM_DEBUG
 
-#if defined(LIBDVM_DEBUG) && defined(LIBDVM_CALICO)
+#if defined(LIBDVM_DEBUG) && defined(__NDS__)
 #include <calico/system/dietprint.h>
 #define dvmDebug(...) dietPrint(__VA_ARGS__)
 #else

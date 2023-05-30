@@ -55,13 +55,8 @@ target_sources(dvm PRIVATE
 )
 
 if(NINTENDO_DS)
-	if(NOT DKP_NDS_OLD_ROOT)
-		target_compile_definitions(dvm PRIVATE LIBDVM_CALICO)
-		target_sources(dvm PRIVATE source/dvm_calico.c source/nitrofs.c)
-		set(extra_install PATTERN filesystem.h)
-	else()
-		target_sources(dvm PRIVATE source/dvm_libnds.c)
-	endif()
+	target_sources(dvm PRIVATE source/dvm_calico.c source/nitrofs.c)
+	set(extra_install PATTERN filesystem.h)
 endif()
 
 if(NINTENDO_GAMECUBE OR NINTENDO_WII)
