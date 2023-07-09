@@ -162,7 +162,7 @@ static void _FAT_set_stat(struct stat* st, const FILINFO* fno, DvmDisc* disc)
 {
 	// Fill device fields
 	st->st_dev = disc->io_type;
-	st->st_ino = 0; // XX: should be file cluster number, not supported by FatFs
+	st->st_ino = fno->cl;
 
 	// Generate fake POSIX mode
 	st->st_mode = S_IRUSR | S_IRGRP | S_IROTH;
