@@ -78,7 +78,14 @@ bool dvmMountVolume(const char* name, DvmDisc* disc, sec_t start_sector, const c
 	const devoptab_t* default_dev = GetDeviceOpTab("");
 	if (!default_dev || strcmp(default_dev->name, "stdnull") == 0) {
 		dvmDebug("Default dev %s (%d)\n", vol->dotab.name, devid);
-		setDefaultDevice(devid);
+
+		char cwd[32+3];
+		unsigned pos = strnlen(vol->dotab.name, 32);
+		memcpy(cwd, vol->dotab.name, pos);
+		cwd[pos+0] = ':';
+		cwd[pos+1] = '/';
+		cwd[pos+2] = 0;
+		chdir(cwd);
 	} else {
 		dvmDebug("Added dev %s (%d)\n", vol->dotab.name, devid);
 	}
