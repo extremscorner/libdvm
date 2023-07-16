@@ -1,8 +1,8 @@
 #include <calico.h>
 #include <dvm.h>
 
-MEOW_WEAK unsigned g_dvmDefaultCachePages = 16;
-MEOW_WEAK unsigned g_dvmDefaultSectorsPerPage = 8;
+MK_WEAK unsigned g_dvmDefaultCachePages = 16;
+MK_WEAK unsigned g_dvmDefaultSectorsPerPage = 8;
 
 void _dvmSetAppWorkingDir(const char* argv0);
 
