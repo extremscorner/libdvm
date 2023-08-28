@@ -57,6 +57,10 @@ target_sources(dvm PRIVATE
 if(NINTENDO_DS)
 	target_sources(dvm PRIVATE source/dvm_calico.c source/nitrofs.c)
 	set(extra_install PATTERN filesystem.h)
+	target_compile_definitions(dvm PRIVATE
+		LIBDVM_WITH_CACHE_COPY
+		LIBDVM_WITH_ALIGNED_ACCESS
+	)
 endif()
 
 if(NINTENDO_GAMECUBE OR NINTENDO_WII)

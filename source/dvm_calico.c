@@ -6,6 +6,22 @@ MK_WEAK unsigned g_dvmDefaultSectorsPerPage = 8;
 
 void _dvmSetAppWorkingDir(const char* argv0);
 
+bool _dvmIsAlignedAccess(const void* ptr, bool is_write)
+{
+	uptr addr = (uptr)ptr;
+	uptr align = is_write ? 4 : ARM_CACHE_LINE_SZ;
+	return ((addr & (align-1)) == 0) && addr >= MM_MAINRAM && addr < MM_DTCM;
+}
+
+void _dvmCacheCopy(void* dst, const void* src, size_t size)
+{
+	if_likely ((((uptr)dst | (uptr)src) & 3) == 0) {
+		armCopyMem32(dst, src, size);
+	} else {
+		__builtin_memcpy(dst, src, size);
+	}
+}
+
 static void _dvmDiscCalicoDummy(DvmDisc* self_)
 {
 	// Nothing
