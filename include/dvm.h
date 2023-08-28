@@ -72,6 +72,21 @@ DvmDisc* dvmDiscCacheCreate(DvmDisc* inner_disc, unsigned cache_pages, unsigned 
 void dvmDiscAddUser(DvmDisc* disc);
 void dvmDiscRemoveUser(DvmDisc* disc);
 
+static inline bool dvmDiscReadSectors(DvmDisc* disc, void* buffer, sec_t sectors, sec_t num_sectors)
+{
+	return disc->vt->read_sectors(disc, buffer, sectors, num_sectors);
+}
+
+static inline bool dvmDiscWriteSectors(DvmDisc* disc, const void* buffer, sec_t sectors, sec_t num_sectors)
+{
+	return disc->vt->write_sectors(disc, buffer, sectors, num_sectors);
+}
+
+static inline void dvmDiscFlush(DvmDisc* disc)
+{
+	disc->vt->flush(disc);
+}
+
 // Volume management
 bool dvmRegisterFsDriver(const DvmFsDriver* fsdrv);
 bool dvmMountVolume(const char* name, DvmDisc* disc, sec_t start_sector, const char* fstype);
