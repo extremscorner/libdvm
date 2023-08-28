@@ -3,6 +3,7 @@
 
 MK_WEAK unsigned g_dvmDefaultCachePages = 16;
 MK_WEAK unsigned g_dvmDefaultSectorsPerPage = 8;
+MK_WEAK unsigned g_dvmCalicoNandMount = 0;
 
 void _dvmSetAppWorkingDir(const char* argv0);
 
@@ -57,6 +58,12 @@ static DvmDisc s_dvmDiscSd = {
 	.features = FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE,
 };
 
+static DvmDisc s_dvmDiscNand = {
+	.vt       = &s_dvmDiscCalicoIface,
+	.io_type  = BlkDevice_TwlNandAes,
+	.features = FEATURE_MEDIUM_CANREAD,
+};
+
 static DvmDisc* _dvmGetCalicoDisc(DvmDisc* disc, unsigned cache_pages, unsigned sectors_per_page)
 {
 	BlkDevice dev = (BlkDevice)disc->io_type;
@@ -107,6 +114,16 @@ bool dvmInit(bool set_app_cwdir, unsigned cache_pages, unsigned sectors_per_page
 	if (systemIsTwlMode()) {
 		// Try mounting DSi SD card
 		num_mounted += _dvmGetAndMountCalicoDisc("sd", &s_dvmDiscSd, cache_pages, sectors_per_page);
+
+		// Try mounting DSi NAND if requested
+		if (g_dvmCalicoNandMount) {
+			// Enable write access if requested
+			if (g_dvmCalicoNandMount >= 2) {
+				s_dvmDiscNand.features |= FEATURE_MEDIUM_CANWRITE;
+			}
+
+			num_mounted += _dvmGetAndMountCalicoDisc("nand", &s_dvmDiscNand, cache_pages, sectors_per_page);
+		}
 	}
 
 	// Set current working directory if needed
