@@ -307,9 +307,35 @@ off_t _FAT_seek_r(struct _reent* r, void* fd, off_t offset, int whence)
 
 int _FAT_fstat_r(struct _reent* r, void* fd, struct stat* st)
 {
-	// TODO
-	r->_errno = ENOSYS;
-	return -1;
+	FFFIL* fp = (FFFIL*)fd;
+	FatVolume* vol = _fatVolumeFromFatFs(fp->obj.fs);
+
+	// Fill device fields
+	st->st_dev = vol->disc->io_type;
+	st->st_ino = fp->obj.sclust;
+
+	// Generate fake POSIX mode
+	st->st_mode = S_IRUSR | S_IRGRP | S_IROTH | S_IFREG;
+	if (fp->flag & FA_WRITE) {
+		st->st_mode |= S_IWUSR | S_IWGRP | S_IWOTH;
+	}
+
+	// Fill other fields
+	st->st_nlink = 1; // Always one hard link on a FAT file
+	st->st_uid   = 1; // Faked for FAT
+	st->st_gid   = 2; // Faked for FAT
+	st->st_rdev  = st->st_dev;
+	st->st_size  = st->st_ino ? fp->obj.objsize : 0;
+
+	// XX: Retrieving file times requires reading the directory entry again
+	st->st_atime = st->st_mtime = st->st_ctime = 0;
+
+	// Fill sector-wise information
+	st->st_blksize = FF_MAX_SS; // XX: fs->ssize used when FF_MIN_SS!=FF_MAX_SS
+	st->st_blocks  = st->st_size / st->st_blksize;
+
+	r->_errno = 0;
+	return 0;
 }
 
 int _FAT_stat_r(struct _reent* r, const char* path, struct stat* st)
