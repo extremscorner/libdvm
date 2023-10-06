@@ -28,6 +28,7 @@ static int _FAT_dirclose_r(struct _reent*, DIR_ITER*);
 static int _FAT_statvfs_r(struct _reent*, const char*, struct statvfs*);
 static int _FAT_ftruncate_r(struct _reent*, void*, off_t);
 static int _FAT_fsync_r(struct _reent*, void*);
+static int _FAT_rmdir_r(struct _reent*, const char*);
 
 static const devoptab_t _FAT_devoptab = {
 	.structSize   = sizeof(FFFIL),
@@ -50,7 +51,7 @@ static const devoptab_t _FAT_devoptab = {
 	.statvfs_r    = _FAT_statvfs_r,
 	.ftruncate_r  = _FAT_ftruncate_r,
 	.fsync_r      = _FAT_fsync_r,
-	.rmdir_r      = _FAT_unlink_r, // XX: Needs FatFs mod to be more precise
+	.rmdir_r      = _FAT_rmdir_r,
 	.lstat_r      = _FAT_stat_r,
 };
 
@@ -324,12 +325,22 @@ int _FAT_stat_r(struct _reent* r, const char* path, struct stat* st)
 	return _FAT_set_errno(fr, &r->_errno) ? 0 : -1;
 }
 
-int _FAT_unlink_r(struct _reent* r, const char* path)
+static int _FAT_unlink_rmdir_r(struct _reent* r, const char* path, bool is_rmdir)
 {
 	FatVolume* vol = (FatVolume*)r->deviceData;
-	FRESULT fr = f_unlink(&vol->fs, _FAT_strip_device(path));
+	FRESULT fr = f_unlink(&vol->fs, _FAT_strip_device(path), is_rmdir);
 
 	return _FAT_set_errno(fr, &r->_errno) ? 0 : -1;
+}
+
+int _FAT_unlink_r(struct _reent* r, const char* path)
+{
+	return _FAT_unlink_rmdir_r(r, path, false);
+}
+
+int _FAT_rmdir_r(struct _reent* r, const char* path)
+{
+	return _FAT_unlink_rmdir_r(r, path, true);
 }
 
 int _FAT_chdir_r(struct _reent* r, const char* path)
