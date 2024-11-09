@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: ZPL-2.1
+// SPDX-FileCopyrightText: Copyright fincs, devkitPro
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

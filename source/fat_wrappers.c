@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: ZPL-2.1
+// SPDX-FileCopyrightText: Copyright fincs, devkitPro
 #include <fat.h>
 
 extern unsigned g_dvmDefaultCachePages, g_dvmDefaultSectorsPerPage;

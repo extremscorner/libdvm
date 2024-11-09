@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: ZPL-2.1
+// SPDX-FileCopyrightText: Copyright fincs, devkitPro
 #include <sdcard/wiisd_io.h>
 #include <ogc/usbstorage.h>
 #include <sdcard/gcsd.h>
