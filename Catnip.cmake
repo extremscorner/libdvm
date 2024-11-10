@@ -1,6 +1,11 @@
 
 catnip_package(dvm DEFAULT all)
 
+catnip_add_preset(gba
+	TOOLSET    GBA
+	BUILD_TYPE MinSizeRel
+)
+
 catnip_add_preset(ds
 	TOOLSET    NDS
 	BUILD_TYPE Release

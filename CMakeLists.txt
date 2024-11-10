@@ -5,6 +5,8 @@ project(dvm LANGUAGES C)
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	if(NINTENDO_DS AND ARM9)
 		set(CMAKE_INSTALL_PREFIX "${NDS_ROOT}" CACHE PATH "" FORCE)
+	elseif(NINTENDO_GBA)
+		set(CMAKE_INSTALL_PREFIX "${GBA_ROOT}" CACHE PATH "" FORCE)
 	elseif(NINTENDO_GAMECUBE OR NINTENDO_WII)
 		set(CMAKE_INSTALL_PREFIX "${OGC_ROOT}" CACHE PATH "" FORCE)
 		set(LIB_SUBDIR "/${OGC_SUBDIR}")
@@ -31,10 +33,17 @@ target_compile_options(dvm PRIVATE
 	-Wall
 )
 
-target_compile_definitions(dvm PRIVATE
-	# Disc I/O buffer alignment (should match CPU cache line size)
-	LIBDVM_BUFFER_ALIGN=32
-)
+if (NOT NINTENDO_GBA)
+	target_compile_definitions(dvm PRIVATE
+		# Disc I/O buffer alignment (should match CPU cache line size)
+		LIBDVM_BUFFER_ALIGN=32
+	)
+else()
+	target_compile_definitions(dvm PRIVATE
+		# Disc I/O buffer alignment (should match CPU cache line size)
+		LIBDVM_BUFFER_ALIGN=4
+	)
+endif()
 
 target_include_directories(dvm PRIVATE
 	include
@@ -61,6 +70,10 @@ if(NINTENDO_DS)
 		LIBDVM_WITH_CACHE_COPY
 		LIBDVM_WITH_ALIGNED_ACCESS
 	)
+endif()
+
+if(NINTENDO_GBA)
+	target_sources(dvm PRIVATE source/dvm_libgba.c)
 endif()
 
 if(NINTENDO_GAMECUBE OR NINTENDO_WII)
