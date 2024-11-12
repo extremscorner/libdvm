@@ -1,0 +1,1 @@
+This is a fork of [libdvm](https://github.com/devkitPro/libdvm) to enable interoperability with [libogc2](https://github.com/extremscorner/libogc2). Please try to contribute upstream if possible.

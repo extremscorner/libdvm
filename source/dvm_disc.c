@@ -7,24 +7,38 @@ extern unsigned g_dvmDefaultCachePages, g_dvmDefaultSectorsPerPage;
 
 typedef struct DvmDiscWrap {
 	DvmDisc base;
-	const DISC_INTERFACE* iface;
+	DISC_INTERFACE* iface;
 } DvmDiscWrap;
 
 static void _dvmDiscWrapDestroy(DvmDisc* self_)
 {
-	free(self_);
+	DvmDiscWrap* self = (DvmDiscWrap*)self_;
+#if defined(__gamecube__) || defined(__wii__)
+	self->iface->shutdown(self->iface);
+#else
+	self->iface->shutdown();
+#endif
+	free(self);
 }
 
 static bool _dvmDiscWrapReadSectors(DvmDisc* self_, void* buffer, sec_t first_sector, sec_t num_sectors)
 {
 	DvmDiscWrap* self = (DvmDiscWrap*)self_;
+#if defined(__gamecube__) || defined(__wii__)
+	return self->iface->readSectors(self->iface, first_sector, num_sectors, buffer);
+#else
 	return self->iface->readSectors(first_sector, num_sectors, buffer);
+#endif
 }
 
 static bool _dvmDiscWrapWriteSectors(DvmDisc* self_, const void* buffer, sec_t first_sector, sec_t num_sectors)
 {
 	DvmDiscWrap* self = (DvmDiscWrap*)self_;
+#if defined(__gamecube__) || defined(__wii__)
+	return self->iface->writeSectors(self->iface, first_sector, num_sectors, buffer);
+#else
 	return self->iface->writeSectors(first_sector, num_sectors, buffer);
+#endif
 }
 
 static void _dvmDiscWrapFlush(DvmDisc* self_)
@@ -43,11 +57,17 @@ bool dvmInitDefault(void)
 	return dvmInit(true, g_dvmDefaultCachePages, g_dvmDefaultSectorsPerPage);
 }
 
-DvmDisc* dvmDiscCreate(const DISC_INTERFACE* iface)
+DvmDisc* dvmDiscCreate(DISC_INTERFACE* iface)
 {
+#if defined(__gamecube__) || defined(__wii__)
+	if (!iface || !iface->startup(iface) || !iface->isInserted(iface)) {
+		return NULL;
+	}
+#else
 	if (!iface || !iface->startup() || !iface->isInserted()) {
 		return NULL;
 	}
+#endif
 
 	DvmDiscWrap* disc = (DvmDiscWrap*)malloc(sizeof(DvmDiscWrap));
 	if (disc) {

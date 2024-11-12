@@ -69,7 +69,7 @@ bool dvmInitDefault(void);
 bool dvmInit(bool set_app_cwdir, unsigned cache_pages, unsigned sectors_per_page);
 
 // Disc and cache management
-DvmDisc* dvmDiscCreate(const DISC_INTERFACE* iface);
+DvmDisc* dvmDiscCreate(DISC_INTERFACE* iface);
 DvmDisc* dvmDiscCacheCreate(DvmDisc* inner_disc, unsigned cache_pages, unsigned sectors_per_page);
 void dvmDiscAddUser(DvmDisc* disc);
 void dvmDiscRemoveUser(DvmDisc* disc);
@@ -97,7 +97,7 @@ void dvmUnmountVolume(const char* name);
 // Partition table and filesystem probing
 unsigned dvmReadPartitionTable(DvmDisc* disc, DvmPartInfo* out, unsigned max_partitions, unsigned flags);
 unsigned dvmProbeMountDisc(const char* basename, DvmDisc* disc);
-unsigned dvmProbeMountDiscIface(const char* basename, const DISC_INTERFACE* iface, unsigned cache_pages, unsigned sectors_per_page);
+unsigned dvmProbeMountDiscIface(const char* basename, DISC_INTERFACE* iface, unsigned cache_pages, unsigned sectors_per_page);
 
 #ifdef __cplusplus
 }

@@ -22,12 +22,12 @@ bool fatInit(unsigned cache_pages, bool set_app_cwdir)
 	return true;
 }
 
-bool fatMountSimple(const char* name, const DISC_INTERFACE* iface)
+bool fatMountSimple(const char* name, DISC_INTERFACE* iface)
 {
 	return fatMount(name, iface, 0, g_dvmDefaultCachePages, g_dvmDefaultSectorsPerPage);
 }
 
-bool fatMount(const char* name, const DISC_INTERFACE* iface, sec_t start_sector, unsigned cache_pages, unsigned sectors_per_page)
+bool fatMount(const char* name, DISC_INTERFACE* iface, sec_t start_sector, unsigned cache_pages, unsigned sectors_per_page)
 {
 	bool rc = false;
 	DvmDisc* disc = NULL;

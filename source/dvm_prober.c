@@ -230,7 +230,7 @@ unsigned dvmProbeMountDisc(const char* basename, DvmDisc* disc)
 	return num_mounted;
 }
 
-unsigned dvmProbeMountDiscIface(const char* basename, const DISC_INTERFACE* iface, unsigned cache_pages, unsigned sectors_per_page)
+unsigned dvmProbeMountDiscIface(const char* basename, DISC_INTERFACE* iface, unsigned cache_pages, unsigned sectors_per_page)
 {
 	bool num_mounted = 0;
 	DvmDisc* disc = NULL;

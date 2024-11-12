@@ -77,7 +77,10 @@ if(NINTENDO_GBA)
 endif()
 
 if(NINTENDO_GAMECUBE OR NINTENDO_WII)
-	target_sources(dvm PRIVATE source/dvm_libogc.c)
+	target_sources(dvm PRIVATE source/dvm_libogc2.c)
+	target_compile_definitions(dvm PRIVATE
+		LIBDVM_WITH_ALIGNED_ACCESS
+	)
 endif()
 
 include(GNUInstallDirs)
