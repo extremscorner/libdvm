@@ -161,10 +161,10 @@ static time_t _FAT_make_time(uint16_t fdate, uint16_t ftime)
 	return mktime(&arg);
 }
 
-static void _FAT_set_stat(struct stat* st, const FILINFO* fno, DvmDisc* disc)
+static void _FAT_set_stat(struct stat* st, const FILINFO* fno, FatVolume* vol)
 {
 	// Fill device fields
-	st->st_dev = disc->io_type;
+	st->st_dev = vol->disc->io_type;
 	st->st_ino = fno->cl;
 
 	// Generate fake POSIX mode
@@ -189,8 +189,8 @@ static void _FAT_set_stat(struct stat* st, const FILINFO* fno, DvmDisc* disc)
 	st->st_atime = st->st_mtime = st->st_ctime = _FAT_make_time(fno->fdate, fno->ftime);
 
 	// Fill sector-wise information
-	st->st_blksize = FF_MAX_SS; // XX: fs->ssize used when FF_MIN_SS!=FF_MAX_SS
-	st->st_blocks  = st->st_size / st->st_blksize;
+	st->st_blksize = vol->fs.csize * FF_MAX_SS; // XX: fs->ssize used when FF_MIN_SS!=FF_MAX_SS
+	st->st_blocks  = ((st->st_size + st->st_blksize - 1) & ~((off_t)st->st_blksize - 1)) / S_BLKSIZE;
 }
 
 int _FAT_open_r(struct _reent* r, void* fd, const char* path, int flags, int mode)
@@ -333,8 +333,8 @@ int _FAT_fstat_r(struct _reent* r, void* fd, struct stat* st)
 	st->st_atime = st->st_mtime = st->st_ctime = 0;
 
 	// Fill sector-wise information
-	st->st_blksize = FF_MAX_SS; // XX: fs->ssize used when FF_MIN_SS!=FF_MAX_SS
-	st->st_blocks  = st->st_size / st->st_blksize;
+	st->st_blksize = vol->fs.csize * FF_MAX_SS; // XX: fs->ssize used when FF_MIN_SS!=FF_MAX_SS
+	st->st_blocks  = ((st->st_size + st->st_blksize - 1) & ~((off_t)st->st_blksize - 1)) / S_BLKSIZE;
 
 	r->_errno = 0;
 	return 0;
@@ -347,7 +347,7 @@ int _FAT_stat_r(struct _reent* r, const char* path, struct stat* st)
 	FRESULT fr = f_stat(&vol->fs, _FAT_strip_device(path), &fno);
 
 	if (fr == FR_OK) {
-		_FAT_set_stat(st, &fno, vol->disc);
+		_FAT_set_stat(st, &fno, vol);
 	}
 
 	return _FAT_set_errno(fr, &r->_errno) ? 0 : -1;
@@ -433,7 +433,7 @@ int _FAT_dirnext_r(struct _reent* r, DIR_ITER* it, char* filename_buf, struct st
 
 		// Populate stat struct if needed
 		if (st) {
-			_FAT_set_stat(st, fno, _fatDiscFromFatFs(dp->obj.fs));
+			_FAT_set_stat(st, fno, _fatVolumeFromFatFs(dp->obj.fs));
 		}
 	}
 
