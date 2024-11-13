@@ -105,7 +105,6 @@ static bool _dvmIsVolume(const devoptab_t* dotab)
 
 void dvmUnmountVolume(const char* name)
 {
-	/*
 	char namebuf[32];
 	if (!strchr(name, ':')) {
 		size_t namelen = strnlen(name, sizeof(namebuf)-2);
@@ -114,7 +113,6 @@ void dvmUnmountVolume(const char* name)
 		namebuf[namelen+1] = 0;
 		name = namebuf;
 	}
-	*/
 
 	const devoptab_t* dotab = GetDeviceOpTab(name);
 	if (!dotab || !_dvmIsVolume(dotab)) {

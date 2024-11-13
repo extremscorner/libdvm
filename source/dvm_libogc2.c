@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: ZPL-2.1
 // SPDX-FileCopyrightText: Copyright fincs, devkitPro
+#include <string.h>
 #include <ogc/dvd.h>
 #include <ogc/system.h>
 #include <ogc/usbstorage.h>
@@ -16,6 +17,27 @@ bool _dvmIsAlignedAccess(const void* ptr, bool is_write)
 {
 	return SYS_IsDMAAddress(ptr);
 }
+
+static s32 _dvmOnReset(s32 final)
+{
+	if (final) {
+		return true;
+	}
+
+	for (unsigned i = 3; i < STD_MAX; i ++) {
+		const devoptab_t* dotab = devoptab_list[i];
+		if (dotab && strcmp(dotab->name, "stdnull") != 0) {
+			dvmUnmountVolume(dotab->name);
+		}
+	}
+
+	return true;
+}
+
+static sys_resetinfo s_dvmResetInfo = {
+	.func = _dvmOnReset,
+	.prio = 0,
+};
 
 bool dvmInit(bool set_app_cwdir, unsigned cache_pages, unsigned sectors_per_page)
 {
@@ -58,6 +80,11 @@ bool dvmInit(bool set_app_cwdir, unsigned cache_pages, unsigned sectors_per_page
 	// Set current working directory if needed
 	if (set_app_cwdir && num_mounted != 0 && __system_argv->argc >= 1) {
 		_dvmSetAppWorkingDir(__system_argv->argv[0]);
+	}
+
+	// Register reset function
+	if (num_mounted != 0) {
+		SYS_RegisterResetFunc(&s_dvmResetInfo);
 	}
 
 	return num_mounted != 0;
