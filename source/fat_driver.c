@@ -493,6 +493,8 @@ int _FAT_ftruncate_r(struct _reent* r, void* fd, off_t size)
 	FRESULT fr = size >= 0 ? FR_OK : FR_INVALID_PARAMETER;
 
 	if (fr == FR_OK) {
+		f_expand(fp, (FSIZE_t)size, 1);
+
 		pos_backup = f_tell(fp);
 		if (pos_backup != (FSIZE_t)size) {
 			if (pos_backup > (FSIZE_t)size) {
