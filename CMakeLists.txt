@@ -21,7 +21,7 @@ set_target_properties(dvm PROPERTIES OUTPUT_NAME fat)
 if (NOT EXISTS "${CMAKE_SOURCE_DIR}/fatfs/CMakeLists.txt")
 	include(FetchContent)
 	FetchContent_Populate(FatFs
-		GIT_REPOSITORY https://github.com/devkitPro/fatfs-mod
+		GIT_REPOSITORY https://github.com/extremscorner/fatfs-mod
 		GIT_TAG        dkp-mods
 		SOURCE_DIR     ${CMAKE_SOURCE_DIR}/fatfs
 	)

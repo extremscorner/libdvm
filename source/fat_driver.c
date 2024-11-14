@@ -65,6 +65,14 @@ const DvmFsDriver g_vfatFsDriver = {
 	.umount         = _FAT_umount,
 };
 
+const DvmFsDriver g_exfatFsDriver = {
+	.fstype         = "exfat",
+	.device_data_sz = sizeof(FatVolume),
+	.dotab_template = &_FAT_devoptab,
+	.mount          = _FAT_mount,
+	.umount         = _FAT_umount,
+};
+
 static FatVolume* _fatVolumeFromPath(const char* path)
 {
 	const devoptab_t* dotab = GetDeviceOpTab(path);
@@ -189,7 +197,7 @@ static void _FAT_set_stat(struct stat* st, const FILINFO* fno, FatVolume* vol)
 	st->st_atime = st->st_mtime = st->st_ctime = _FAT_make_time(fno->fdate, fno->ftime);
 
 	// Fill sector-wise information
-	st->st_blksize = vol->fs.csize * FF_MAX_SS; // XX: fs->ssize used when FF_MIN_SS!=FF_MAX_SS
+	st->st_blksize = vol->fs.csize * vol->fs.ssize;
 	st->st_blocks  = ((st->st_size + st->st_blksize - 1) & ~((off_t)st->st_blksize - 1)) / S_BLKSIZE;
 }
 
@@ -333,7 +341,7 @@ int _FAT_fstat_r(struct _reent* r, void* fd, struct stat* st)
 	st->st_atime = st->st_mtime = st->st_ctime = 0;
 
 	// Fill sector-wise information
-	st->st_blksize = vol->fs.csize * FF_MAX_SS; // XX: fs->ssize used when FF_MIN_SS!=FF_MAX_SS
+	st->st_blksize = vol->fs.csize * vol->fs.ssize;
 	st->st_blocks  = ((st->st_size + st->st_blksize - 1) & ~((off_t)st->st_blksize - 1)) / S_BLKSIZE;
 
 	r->_errno = 0;
@@ -457,7 +465,7 @@ int _FAT_statvfs_r(struct _reent* r, const char* path, struct statvfs* buf)
 
 	if (fr == FR_OK && buf) {
 		// Block/fragment size = cluster size
-		buf->f_bsize   = vol->fs.csize * FF_MAX_SS;
+		buf->f_bsize   = vol->fs.csize * vol->fs.ssize;
 		buf->f_frsize  = buf->f_bsize;
 
 		// Block information = total/free clusters
@@ -559,26 +567,46 @@ DWORD get_fattime(void)
 		(DWORD)stm.tm_sec >> 1;
 }
 
+static _LOCK_T s_fatSystemLock;
+
 int ff_mutex_create(FATFS* fs)
 {
-	__lock_init(_fatVolumeFromFatFs(fs)->lock);
+	if (fs) {
+		__lock_init(_fatVolumeFromFatFs(fs)->lock);
+	} else {
+		__lock_init(s_fatSystemLock);
+	}
+
 	return 1;
 }
 
 void ff_mutex_delete(FATFS* fs)
 {
-	__lock_close(_fatVolumeFromFatFs(fs)->lock);
+	if (fs) {
+		__lock_close(_fatVolumeFromFatFs(fs)->lock);
+	} else {
+		__lock_close(s_fatSystemLock);
+	}
 }
 
 int ff_mutex_take(FATFS* fs)
 {
-	__lock_acquire(_fatVolumeFromFatFs(fs)->lock);
+	if (fs) {
+		__lock_acquire(_fatVolumeFromFatFs(fs)->lock);
+	} else {
+		__lock_acquire(s_fatSystemLock);
+	}
+
 	return 1;
 }
 
 void ff_mutex_give(FATFS* fs)
 {
-	__lock_release(_fatVolumeFromFatFs(fs)->lock);
+	if (fs) {
+		__lock_release(_fatVolumeFromFatFs(fs)->lock);
+	} else {
+		__lock_release(s_fatSystemLock);
+	}
 }
 
 DSTATUS disk_initialize(void* pdrv)
@@ -631,6 +659,16 @@ DRESULT disk_ioctl(void* pdrv, BYTE cmd, void* buff)
 
 		case CTRL_SYNC: {
 			disc->vt->flush(disc);
+			return RES_OK;
+		}
+
+		case GET_SECTOR_COUNT: {
+			*(LBA_t*)buff = (LBA_t)disc->num_sectors;
+			return RES_OK;
+		}
+
+		case GET_SECTOR_SIZE: {
+			*(WORD*)buff = 512U;
 			return RES_OK;
 		}
 	}

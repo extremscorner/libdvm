@@ -1,4 +1,4 @@
 [submodule "fatfs"]
 	path = fatfs
-	url = https://github.com/devkitPro/fatfs-mod.git
+	url = https://github.com/extremscorner/fatfs-mod.git
 	branch = dkp-mods

@@ -18,6 +18,9 @@ extern "C" {
 // vfat filesystem driver
 extern const DvmFsDriver g_vfatFsDriver;
 
+// exfat filesystem driver
+extern const DvmFsDriver g_exfatFsDriver;
+
 // Compatibility functions
 bool fatInitDefault(void);
 bool fatInit(unsigned cache_pages, bool set_app_cwdir);

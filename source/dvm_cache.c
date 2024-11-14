@@ -166,7 +166,7 @@ static bool _dvmDiscCacheReadWrite(
 
 	while (num_sectors) {
 		// Calculate associated page & offset within page
-		sec_t cur_page_sector = first_sector &~ page_mask;
+		sec_t cur_page_sector = first_sector & ~(sec_t)page_mask;
 		unsigned cur_page_offset = first_sector & page_mask;
 
 		// Calculate max sectors to access within this page

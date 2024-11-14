@@ -189,7 +189,7 @@ unsigned dvmReadPartitionTable(DvmDisc* disc, DvmPartInfo* out, unsigned max_par
 	}
 
 	unsigned num_parts = 0;
-	void* buf = aligned_alloc(LIBDVM_BUFFER_ALIGN, 512);
+	void* buf = aligned_alloc(LIBDVM_BUFFER_ALIGN, 4096U);
 	if (buf) {
 		num_parts = _dvmReadPartitionTable(disc, out, max_partitions, flags, buf);
 		free(buf);

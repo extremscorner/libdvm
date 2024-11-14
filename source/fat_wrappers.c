@@ -15,6 +15,10 @@ bool fatInit(unsigned cache_pages, bool set_app_cwdir)
 		return false;
 	}
 
+	if (!dvmRegisterFsDriver(&g_exfatFsDriver)) {
+		return false;
+	}
+
 	if (!dvmInit(set_app_cwdir, cache_pages, g_dvmDefaultSectorsPerPage)) {
 		return false;
 	}
