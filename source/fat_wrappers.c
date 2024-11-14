@@ -45,6 +45,10 @@ bool fatMount(const char* name, DISC_INTERFACE* iface, sec_t start_sector, unsig
 	}
 
 	if (disc) {
+		rc = dvmRegisterFsDriver(&g_vfatFsDriver);
+	}
+
+	if (rc && disc) {
 		rc = dvmMountVolume(name, disc, start_sector, "vfat");
 	}
 

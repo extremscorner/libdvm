@@ -32,6 +32,8 @@ bool dvmRegisterFsDriver(const DvmFsDriver* fsdrv)
 		} else if (!s_dvmFsDrvTable[i]) {
 			s_dvmFsDrvTable[i] = fsdrv;
 			return true;
+		} else if (strcmp(s_dvmFsDrvTable[i]->fstype, fsdrv->fstype) == 0) {
+			return false;
 		}
 	}
 
