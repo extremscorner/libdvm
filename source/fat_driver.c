@@ -31,6 +31,7 @@ static int _FAT_statvfs_r(struct _reent*, const char*, struct statvfs*);
 static int _FAT_ftruncate_r(struct _reent*, void*, off_t);
 static int _FAT_fsync_r(struct _reent*, void*);
 static int _FAT_rmdir_r(struct _reent*, const char*);
+static int _FAT_utimes_r(struct _reent*, const char*, const struct timeval[2]);
 
 static const devoptab_t _FAT_devoptab = {
 	.structSize   = sizeof(FFFIL),
@@ -55,6 +56,7 @@ static const devoptab_t _FAT_devoptab = {
 	.fsync_r      = _FAT_fsync_r,
 	.rmdir_r      = _FAT_rmdir_r,
 	.lstat_r      = _FAT_stat_r,
+	.utimes_r     = _FAT_utimes_r,
 };
 
 const DvmFsDriver g_vfatFsDriver = {
@@ -520,6 +522,33 @@ int _FAT_fsync_r(struct _reent* r, void* fd)
 {
 	FFFIL* fp = (FFFIL*)fd;
 	FRESULT fr = f_sync(fp);
+
+	return _FAT_set_errno(fr, &r->_errno) ? 0 : -1;
+}
+
+int _FAT_utimes_r(struct _reent* r, const char* path, const struct timeval times[2])
+{
+	FILINFO fno;
+	FatVolume* vol = (FatVolume*)r->deviceData;
+
+	if (times) {
+		struct tm stm;
+		localtime_r(&times[1].tv_sec, &stm);
+		fno.fdate =
+			(WORD)(stm.tm_year - 80) << 9 |
+			(WORD)(stm.tm_mon + 1) << 5 |
+			(WORD)stm.tm_mday;
+		fno.ftime =
+			(WORD)stm.tm_hour << 11 |
+			(WORD)stm.tm_min << 5 |
+			(WORD)stm.tm_sec >> 1;
+	} else {
+		DWORD tm = get_fattime();
+		fno.fdate = (WORD)(tm >> 16);
+		fno.ftime = (WORD)tm;
+	}
+
+	FRESULT fr = f_utime(&vol->fs, _FAT_strip_device(path), &fno);
 
 	return _FAT_set_errno(fr, &r->_errno) ? 0 : -1;
 }
