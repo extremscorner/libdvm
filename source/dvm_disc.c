@@ -63,6 +63,11 @@ DvmDisc* dvmDiscCreate(DISC_INTERFACE* iface)
 	if (!iface || !iface->startup(iface) || !iface->isInserted(iface)) {
 		return NULL;
 	}
+
+	if (iface->numberOfSectors == 0 || iface->bytesPerSector < 512U) {
+		iface->shutdown(iface);
+		return NULL;
+	}
 #else
 	if (!iface || !iface->startup() || !iface->isInserted()) {
 		return NULL;
@@ -75,7 +80,13 @@ DvmDisc* dvmDiscCreate(DISC_INTERFACE* iface)
 		disc->base.io_type = iface->ioType;
 		disc->base.features = iface->features;
 		disc->base.num_users = 0;
+#if defined(__gamecube__) || defined(__wii__)
+		disc->base.num_sectors = iface->numberOfSectors;
+		disc->base.sector_sz = iface->bytesPerSector;
+#else
 		disc->base.num_sectors = ~(sec_t)0;
+		disc->base.sector_sz = 512U;
+#endif
 		disc->iface = iface;
 	}
 

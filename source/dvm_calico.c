@@ -82,6 +82,7 @@ static DvmDisc* _dvmGetCalicoDisc(DvmDisc* disc, unsigned cache_pages, unsigned 
 
 	// Populate disc size
 	disc->num_sectors = blkDevGetSectorCount(dev);
+	disc->sector_sz = 512U;
 
 	// Create disc cache
 	disc = dvmDiscCacheCreate(disc, cache_pages, sectors_per_page);

@@ -697,7 +697,7 @@ DRESULT disk_ioctl(void* pdrv, BYTE cmd, void* buff)
 		}
 
 		case GET_SECTOR_SIZE: {
-			*(WORD*)buff = 512U;
+			*(WORD*)buff = (WORD)disc->sector_sz;
 			return RES_OK;
 		}
 	}

@@ -34,6 +34,7 @@ struct DvmDisc {
 	uint16_t features;
 	uint16_t num_users;
 	sec_t num_sectors;
+	uint32_t sector_sz;
 };
 
 struct DvmDiscIface {
