@@ -154,7 +154,21 @@ static inline const char* _FAT_strip_device(const char* path)
 	return colonpos ? &colonpos[1] : path;
 }
 
-static time_t _FAT_make_time(uint16_t fdate, uint16_t ftime)
+static DWORD _FAT_make_fattime(const time_t* time)
+{
+	struct tm stm;
+	localtime_r(time, &stm);
+
+	return
+		(DWORD)(stm.tm_year - 80) << 25 |
+		(DWORD)(stm.tm_mon + 1) << 21 |
+		(DWORD)stm.tm_mday << 16 |
+		(DWORD)stm.tm_hour << 11 |
+		(DWORD)stm.tm_min << 5 |
+		(DWORD)stm.tm_sec >> 1;
+}
+
+static time_t _FAT_make_time(WORD fdate, WORD ftime)
 {
 	struct tm arg = {
 		.tm_sec   = (ftime & 0x1f) << 1,
@@ -528,25 +542,18 @@ int _FAT_fsync_r(struct _reent* r, void* fd)
 
 int _FAT_utimes_r(struct _reent* r, const char* path, const struct timeval times[2])
 {
-	FILINFO fno;
 	FatVolume* vol = (FatVolume*)r->deviceData;
 
+	DWORD tm;
 	if (times) {
-		struct tm stm;
-		localtime_r(&times[1].tv_sec, &stm);
-		fno.fdate =
-			(WORD)(stm.tm_year - 80) << 9 |
-			(WORD)(stm.tm_mon + 1) << 5 |
-			(WORD)stm.tm_mday;
-		fno.ftime =
-			(WORD)stm.tm_hour << 11 |
-			(WORD)stm.tm_min << 5 |
-			(WORD)stm.tm_sec >> 1;
+		tm = _FAT_make_fattime(&times[1].tv_sec);
 	} else {
-		DWORD tm = get_fattime();
-		fno.fdate = (WORD)(tm >> 16);
-		fno.ftime = (WORD)tm;
+		tm = get_fattime();
 	}
+
+	FILINFO fno;
+	fno.fdate = (WORD)(tm >> 16);
+	fno.ftime = (WORD)tm;
 
 	FRESULT fr = f_utime(&vol->fs, _FAT_strip_device(path), &fno);
 
@@ -584,17 +591,9 @@ int FAT_setAttr(const char* path, unsigned attr)
 
 DWORD get_fattime(void)
 {
-	struct tm stm;
 	time_t utc_time = time(NULL);
-	localtime_r(&utc_time, &stm);
 
-	return
-		(DWORD)(stm.tm_year - 80) << 25 |
-		(DWORD)(stm.tm_mon + 1) << 21 |
-		(DWORD)stm.tm_mday << 16 |
-		(DWORD)stm.tm_hour << 11 |
-		(DWORD)stm.tm_min << 5 |
-		(DWORD)stm.tm_sec >> 1;
+	return _FAT_make_fattime(&utc_time);
 }
 
 static _LOCK_T s_fatSystemLock;
