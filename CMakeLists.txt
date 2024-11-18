@@ -16,7 +16,7 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 
 add_library(dvm STATIC)
-set_target_properties(dvm PROPERTIES OUTPUT_NAME fat)
+add_library(fat STATIC $<TARGET_OBJECTS:dvm>)
 
 if (NOT EXISTS "${CMAKE_SOURCE_DIR}/fatfs/CMakeLists.txt")
 	include(FetchContent)
@@ -29,9 +29,8 @@ endif()
 
 add_subdirectory(fatfs)
 
-target_compile_options(dvm PRIVATE
-	-Wall
-)
+target_compile_options(dvm PRIVATE -Wall)
+target_compile_options(fat PRIVATE -Wall)
 
 if (NOT NINTENDO_GBA)
 	target_compile_definitions(dvm PRIVATE
@@ -45,12 +44,13 @@ else()
 	)
 endif()
 
-target_include_directories(dvm PRIVATE
+target_include_directories(dvm PUBLIC
 	include
 )
 
-target_link_libraries(dvm PRIVATE
+target_link_libraries(fat PRIVATE
 	FatFs
+	dvm
 )
 
 target_sources(dvm PRIVATE
@@ -58,13 +58,16 @@ target_sources(dvm PRIVATE
 	source/dvm_cache.c
 	source/dvm_volume.c
 	source/dvm_prober.c
+)
 
+target_sources(fat PRIVATE
 	source/fat_wrappers.c
 	source/fat_driver.c
 )
 
 if(NINTENDO_DS)
-	target_sources(dvm PRIVATE source/dvm_calico.c source/nitrofs.c)
+	target_sources(dvm PRIVATE source/dvm_calico.c)
+	target_sources(fat PRIVATE source/nitrofs.c)
 	set(extra_install PATTERN filesystem.h)
 	target_compile_definitions(dvm PRIVATE
 		LIBDVM_WITH_CACHE_COPY
@@ -85,9 +88,9 @@ endif()
 
 include(GNUInstallDirs)
 
-# Install the library
+# Install the libraries
 install(
-	TARGETS dvm
+	TARGETS dvm fat
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}${LIB_SUBDIR}
 )
 
