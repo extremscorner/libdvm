@@ -189,7 +189,7 @@ static void _FAT_set_stat(struct stat* st, const FILINFO* fno, FatVolume* vol)
 {
 	// Fill device fields
 	st->st_dev = vol->disc->io_type;
-	st->st_ino = fno->cl;
+	st->st_ino = fno->fclust;
 
 	// Generate fake POSIX mode
 	st->st_mode = S_IRUSR | S_IRGRP | S_IROTH;

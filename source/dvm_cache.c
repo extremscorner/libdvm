@@ -128,6 +128,7 @@ static void _dvmDiscCacheFlush(DvmDisc* self_)
 		_dvmDiscCacheEntryFlush(self, p);
 	}
 
+	dvmDiscFlush(self->inner);
 	__lock_release(self->lock);
 }
 
