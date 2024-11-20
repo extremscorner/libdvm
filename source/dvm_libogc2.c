@@ -8,8 +8,8 @@
 #include <sdcard/wiisd_io.h>
 #include <dvm.h>
 
-__attribute__((weak)) unsigned g_dvmDefaultCachePages = 4;
-__attribute__((weak)) unsigned g_dvmDefaultSectorsPerPage = 64;
+__attribute__((weak)) unsigned g_dvmDefaultCachePages = 32;
+__attribute__((weak)) unsigned g_dvmDefaultSectorsPerPage = 8;
 
 void _dvmSetAppWorkingDir(const char* argv0);
 
