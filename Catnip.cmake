@@ -6,12 +6,12 @@ catnip_add_preset(gba
 	BUILD_TYPE MinSizeRel
 )
 
-catnip_add_preset(ds
+catnip_add_preset(nds
 	TOOLSET    NDS
 	BUILD_TYPE Release
 )
 
-catnip_add_preset(cube
+catnip_add_preset(gamecube
 	TOOLSET    GameCube
 	BUILD_TYPE Release
 )
