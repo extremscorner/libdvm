@@ -15,7 +15,7 @@ void _dvmSetAppWorkingDir(const char* argv0);
 
 bool _dvmIsAlignedAccess(const void* ptr, bool is_write)
 {
-	return SYS_IsDMAAddress(ptr);
+	return SYS_IsDMAAddress(ptr, LIBDVM_BUFFER_ALIGN);
 }
 
 static s32 _dvmOnReset(s32 final)
