@@ -209,8 +209,9 @@ static void _FAT_set_stat(struct stat* st, const FILINFO* fno, FatVolume* vol)
 	st->st_rdev  = st->st_dev;
 	st->st_size  = fno->fsize;
 
-	// XX: FatFs only extracts modification time
-	st->st_atime = st->st_mtime = st->st_ctime = _FAT_make_time(fno->fdate, fno->ftime);
+	// XX: FatFs only extracts modification and creation times
+	st->st_atime = st->st_mtime = _FAT_make_time(fno->fdate, fno->ftime);
+	st->st_ctime = _FAT_make_time(fno->crdate, fno->crtime);
 
 	// Fill sector-wise information
 	st->st_blksize = vol->fs.csize * vol->fs.ssize;
@@ -552,8 +553,10 @@ int _FAT_utimes_r(struct _reent* r, const char* path, const struct timeval times
 	}
 
 	FILINFO fno;
-	fno.fdate = (WORD)(tm >> 16);
-	fno.ftime = (WORD)tm;
+	fno.fdate  = (WORD)(tm >> 16);
+	fno.ftime  = (WORD)tm;
+	fno.crdate = 0;
+	fno.crtime = 0;
 
 	FRESULT fr = f_utime(&vol->fs, _FAT_strip_device(path), &fno);
 
