@@ -209,8 +209,9 @@ static void _FAT_set_stat(struct stat* st, const FILINFO* fno, FatVolume* vol)
 	st->st_rdev  = st->st_dev;
 	st->st_size  = fno->fsize;
 
-	// XX: FatFs only extracts modification and creation times
-	st->st_atime = st->st_mtime = _FAT_make_time(fno->fdate, fno->ftime);
+	// Fill file times
+	st->st_atime = _FAT_make_time(fno->acdate, fno->actime);
+	st->st_mtime = _FAT_make_time(fno->fdate, fno->ftime);
 	st->st_ctime = _FAT_make_time(fno->crdate, fno->crtime);
 
 	// Fill sector-wise information
@@ -545,16 +546,19 @@ int _FAT_utimes_r(struct _reent* r, const char* path, const struct timeval times
 {
 	FatVolume* vol = (FatVolume*)r->deviceData;
 
-	DWORD tm;
+	DWORD tm[2];
 	if (times) {
-		tm = _FAT_make_fattime(&times[1].tv_sec);
+		tm[0] = _FAT_make_fattime(&times[0].tv_sec);
+		tm[1] = _FAT_make_fattime(&times[1].tv_sec);
 	} else {
-		tm = get_fattime();
+		tm[0] = tm[1] = get_fattime();
 	}
 
 	FILINFO fno;
-	fno.fdate  = (WORD)(tm >> 16);
-	fno.ftime  = (WORD)tm;
+	fno.acdate = (WORD)(tm[0] >> 16);
+	fno.actime = (WORD)tm[0];
+	fno.fdate  = (WORD)(tm[1] >> 16);
+	fno.ftime  = (WORD)tm[1];
 	fno.crdate = 0;
 	fno.crtime = 0;
 
@@ -595,6 +599,12 @@ int FAT_setAttr(const char* path, unsigned attr)
 DWORD get_fattime(void)
 {
 	time_t utc_time = time(NULL);
+	if (utc_time == (time_t)-1) {
+		return
+			(DWORD)(FF_NORTC_YEAR - 1980) << 25 |
+			(DWORD)FF_NORTC_MON << 21 |
+			(DWORD)FF_NORTC_MDAY << 16;
+	}
 
 	return _FAT_make_fattime(&utc_time);
 }
