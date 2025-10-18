@@ -83,7 +83,7 @@ static const char* _dvmIdentMbrVbr(const void* buf)
 			numRsvdSectors > 0 &&
 			(numFats == 1 || numFats == 2) &&
 			numRootEntries > 0 &&
-			(totalSectors16 >= 0x80 || totalSectors32 >= 0x10000) &&
+			(totalSectors16 >= 0x40 || totalSectors32 >= 0x10000) &&
 			sectorsPerFat > 0
 		) {
 			return "vfat";
@@ -201,7 +201,7 @@ unsigned dvmProbeMountDisc(const char* basename, DvmDisc* disc)
 	DvmPartInfo partinfo[4];
 	unsigned num_parts = dvmReadPartitionTable(disc, partinfo, 4, DVM_IDENT_FSTYPE);
 	if (!num_parts) {
-		return 0;
+		return dvmMountVolume(basename, disc, 0, "vfat");
 	}
 
 	dvmDebug("Loaded %u partitions\n", num_parts);
@@ -230,7 +230,7 @@ unsigned dvmProbeMountDisc(const char* basename, DvmDisc* disc)
 
 unsigned dvmProbeMountDiscIface(const char* basename, DISC_INTERFACE* iface, unsigned cache_pages, unsigned sectors_per_page)
 {
-	bool num_mounted = 0;
+	unsigned num_mounted = 0;
 	DvmDisc* disc = NULL;
 
 	if (iface) {
