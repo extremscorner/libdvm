@@ -47,13 +47,13 @@ bool dvmInit(bool set_app_cwdir, unsigned cache_pages, unsigned sectors_per_page
 	DISC_INTERFACE* sd    = &__io_wiisd;
 	DISC_INTERFACE* usb   = &__io_usbstorage;
 #elif defined(__gamecube__)
-	DISC_INTERFACE* sd    = &__io_gcsd2;
+	DISC_INTERFACE* sd    = get_io_gcsd2();
 	DISC_INTERFACE* dvd   = &__io_gcode;
 #else
 #error "Neither Wii nor GameCube"
 #endif
-	DISC_INTERFACE* carda = &__io_gcsda;
-	DISC_INTERFACE* cardb = &__io_gcsdb;
+	DISC_INTERFACE* carda = get_io_gcsda();
+	DISC_INTERFACE* cardb = get_io_gcsdb();
 
 #if defined(__wii__)
 	// Try mounting SD card
