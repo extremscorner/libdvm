@@ -33,12 +33,12 @@ target_compile_options(dvm PRIVATE -Wall)
 target_compile_options(fat PRIVATE -Wall)
 
 if (NOT NINTENDO_GBA)
-	target_compile_definitions(dvm PRIVATE
+	target_compile_definitions(dvm PUBLIC
 		# Disc I/O buffer alignment (should match CPU cache line size)
 		LIBDVM_BUFFER_ALIGN=32
 	)
 else()
-	target_compile_definitions(dvm PRIVATE
+	target_compile_definitions(dvm PUBLIC
 		# Disc I/O buffer alignment (should match CPU cache line size)
 		LIBDVM_BUFFER_ALIGN=4
 	)

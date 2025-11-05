@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include "fat_driver.h"
 #include "dvm_debug.h"
 
@@ -32,6 +33,7 @@ static int _FAT_ftruncate_r(struct _reent*, void*, off_t);
 static int _FAT_fsync_r(struct _reent*, void*);
 static int _FAT_rmdir_r(struct _reent*, const char*);
 static int _FAT_utimes_r(struct _reent*, const char*, const struct timeval[2]);
+static long _FAT_pathconf_r(struct _reent*, const char*, int);
 
 static const devoptab_t _FAT_devoptab = {
 	.structSize   = sizeof(FFFIL),
@@ -57,6 +59,7 @@ static const devoptab_t _FAT_devoptab = {
 	.rmdir_r      = _FAT_rmdir_r,
 	.lstat_r      = _FAT_stat_r,
 	.utimes_r     = _FAT_utimes_r,
+	.pathconf_r   = _FAT_pathconf_r,
 };
 
 const DvmFsDriver g_vfatFsDriver = {
@@ -565,6 +568,41 @@ int _FAT_utimes_r(struct _reent* r, const char* path, const struct timeval times
 	FRESULT fr = f_utime(&vol->fs, _FAT_strip_device(path), &fno);
 
 	return _FAT_set_errno(fr, &r->_errno) ? 0 : -1;
+}
+
+long _FAT_pathconf_r(struct _reent* r, const char* path, int name)
+{
+	FatVolume* vol = (FatVolume*)r->deviceData;
+
+	switch (name) {
+		default:
+			r->_errno = EINVAL;
+			return -1;
+
+		case _PC_LINK_MAX:
+			return 1;
+
+		case _PC_NAME_MAX:
+			return FF_LFN_BUF;
+
+		case _PC_PATH_MAX:
+			return PATH_MAX;
+
+		case _PC_NO_TRUNC:
+			return 1;
+
+		case _PC_FILESIZEBITS:
+			return vol->fs.fs_type != FS_EXFAT ? 33 : 64;
+
+		case _PC_ALLOC_SIZE_MIN:
+			return vol->fs.csize * vol->fs.ssize;
+
+		case _PC_REC_XFER_ALIGN:
+			return LIBDVM_BUFFER_ALIGN;
+
+		case _PC_TIMESTAMP_RESOLUTION:
+			return 2000000000L;
+	}
 }
 
 int FAT_getAttr(const char* path)
