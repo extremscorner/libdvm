@@ -33,6 +33,7 @@ static int _FAT_ftruncate_r(struct _reent*, void*, off_t);
 static int _FAT_fsync_r(struct _reent*, void*);
 static int _FAT_rmdir_r(struct _reent*, const char*);
 static int _FAT_utimes_r(struct _reent*, const char*, const struct timeval[2]);
+static long _FAT_fpathconf_r(struct _reent*, void*, int);
 static long _FAT_pathconf_r(struct _reent*, const char*, int);
 
 static const devoptab_t _FAT_devoptab = {
@@ -59,6 +60,7 @@ static const devoptab_t _FAT_devoptab = {
 	.rmdir_r      = _FAT_rmdir_r,
 	.lstat_r      = _FAT_stat_r,
 	.utimes_r     = _FAT_utimes_r,
+	.fpathconf_r  = _FAT_fpathconf_r,
 	.pathconf_r   = _FAT_pathconf_r,
 };
 
@@ -570,7 +572,7 @@ int _FAT_utimes_r(struct _reent* r, const char* path, const struct timeval times
 	return _FAT_set_errno(fr, &r->_errno) ? 0 : -1;
 }
 
-long _FAT_pathconf_r(struct _reent* r, const char* path, int name)
+long _FAT_fpathconf_r(struct _reent* r, void* fd, int name)
 {
 	FatVolume* vol = (FatVolume*)r->deviceData;
 
@@ -603,6 +605,11 @@ long _FAT_pathconf_r(struct _reent* r, const char* path, int name)
 		case _PC_TIMESTAMP_RESOLUTION:
 			return 2000000000L;
 	}
+}
+
+long _FAT_pathconf_r(struct _reent* r, const char* path, int name)
+{
+	return _FAT_fpathconf_r(r, NULL, name);
 }
 
 int FAT_getAttr(const char* path)
