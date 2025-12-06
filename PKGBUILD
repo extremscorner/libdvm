@@ -2,7 +2,7 @@
 
 _pkgname=libdvm
 pkgname="libogc2-${_pkgname}-git"
-pkgver=r54.b6cad64
+pkgver=r55.2949b3b
 pkgrel=1
 pkgdesc='FAT and disk/volume management library for GameCube and Wii.'
 arch=('any')
@@ -14,6 +14,11 @@ makedepends=('catnip' 'cmake' 'git' 'libogc2-cmake' 'ninja')
 provides=("libogc2-${_pkgname}" 'libogc2-libfat')
 conflicts=("libogc2-${_pkgname}" 'libogc2-libfat')
 options=(!strip libtool staticlibs !buildflags)
+
+prepare() {
+	cd "${startdir}"
+	git update-index --assume-unchanged PKGBUILD
+}
 
 pkgver() {
 	cd "${startdir}"
