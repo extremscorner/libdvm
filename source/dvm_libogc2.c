@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: ZPL-2.1
 // SPDX-FileCopyrightText: Copyright fincs, devkitPro
+#include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <ogc/dvd.h>
 #include <ogc/system.h>
 #include <ogc/usbstorage.h>
@@ -78,8 +80,15 @@ bool dvmInit(bool set_app_cwdir, unsigned cache_pages, unsigned sectors_per_page
 #endif
 
 	// Set current working directory if needed
-	if (set_app_cwdir && num_mounted != 0 && __system_argv->argc >= 1) {
-		_dvmSetAppWorkingDir(__system_argv->argv[0]);
+	if (set_app_cwdir && num_mounted != 0) {
+		const char* pwd = getenv("PWD");
+		if (pwd) {
+			chdir(pwd);
+		}
+
+		if (__system_argv->argc >= 1) {
+			_dvmSetAppWorkingDir(__system_argv->argv[0]);
+		}
 	}
 
 	// Register reset function
