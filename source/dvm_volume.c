@@ -105,7 +105,7 @@ static bool _dvmIsVolume(const devoptab_t* dotab)
 	return dotab->name == expected_name && dotab->deviceData == expected_devdata;
 }
 
-void dvmUnmountVolume(const char* name)
+bool dvmUnmountVolume(const char* name)
 {
 	char namebuf[32];
 	if (!strchr(name, ':')) {
@@ -118,13 +118,14 @@ void dvmUnmountVolume(const char* name)
 
 	const devoptab_t* dotab = GetDeviceOpTab(name);
 	if (!dotab || !_dvmIsVolume(dotab)) {
-		return;
+		return false;
 	}
 
 	DvmVolume* vol = (DvmVolume*)dotab;
 	RemoveDevice(name);
 	vol->fsdrv->umount(vol->device_data);
 	free(vol);
+	return true;
 }
 
 void _dvmSetAppWorkingDir(const char* argv0)

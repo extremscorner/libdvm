@@ -27,8 +27,8 @@ bool fatInit(unsigned cache_pages, bool set_app_cwdir);
 bool fatMountSimple(const char* name, DISC_INTERFACE* iface);
 bool fatMount(const char* name, DISC_INTERFACE* iface, sec_t start_sector, unsigned cache_pages, unsigned sectors_per_page);
 
-static inline void fatUnmount(const char* name) {
-	dvmUnmountVolume(name);
+static inline bool fatUnmount(const char* name) {
+	return dvmUnmountVolume(name);
 }
 
 // FAT specific filesystem functions

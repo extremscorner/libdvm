@@ -93,7 +93,7 @@ static inline void dvmDiscFlush(DvmDisc* disc)
 // Volume management
 bool dvmRegisterFsDriver(const DvmFsDriver* fsdrv);
 bool dvmMountVolume(const char* name, DvmDisc* disc, sec_t start_sector, const char* fstype);
-void dvmUnmountVolume(const char* name);
+bool dvmUnmountVolume(const char* name);
 
 // Partition table and filesystem probing
 unsigned dvmReadPartitionTable(DvmDisc* disc, DvmPartInfo* out, unsigned max_partitions, unsigned flags);
