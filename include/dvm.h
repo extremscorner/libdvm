@@ -68,6 +68,7 @@ extern "C" {
 // Initialization
 bool dvmInitDefault(void);
 bool dvmInit(bool set_app_cwdir, unsigned cache_pages, unsigned sectors_per_page);
+void dvmDeinit(void);
 
 // Disc and cache management
 DvmDisc* dvmDiscCreate(DISC_INTERFACE* iface);

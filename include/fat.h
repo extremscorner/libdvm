@@ -31,6 +31,10 @@ static inline bool fatUnmount(const char* name) {
 	return dvmUnmountVolume(name);
 }
 
+static inline void fatDeinit(void) {
+	dvmDeinit();
+}
+
 // FAT specific filesystem functions
 void fatGetVolumeLabel(const char* name, char* label_out);
 void fatSetVolumeLabel(const char* name, const char* label);

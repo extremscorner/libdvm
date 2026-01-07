@@ -22,15 +22,8 @@ bool _dvmIsAlignedAccess(const void* ptr, bool is_write)
 
 static s32 _dvmOnReset(s32 final)
 {
-	if (final) {
-		return true;
-	}
-
-	for (unsigned i = 3; i < STD_MAX; i ++) {
-		const devoptab_t* dotab = devoptab_list[i];
-		if (dotab && strcmp(dotab->name, "stdnull") != 0) {
-			dvmUnmountVolume(dotab->name);
-		}
+	if (!final) {
+		dvmDeinit();
 	}
 
 	return true;
@@ -97,4 +90,20 @@ bool dvmInit(bool set_app_cwdir, unsigned cache_pages, unsigned sectors_per_page
 	}
 
 	return num_mounted != 0;
+}
+
+void dvmDeinit(void)
+{
+	for (int fd = 3; fd < 1024; fd ++) {
+		fsync(fd);
+	}
+
+	for (unsigned i = 3; i < STD_MAX; i ++) {
+		const devoptab_t* dotab = devoptab_list[i];
+		if (dotab && strcmp(dotab->name, "stdnull") != 0) {
+			dvmUnmountVolume(dotab->name);
+		}
+	}
+
+	SYS_UnregisterResetFunc(&s_dvmResetInfo);
 }

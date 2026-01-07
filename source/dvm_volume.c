@@ -107,6 +107,10 @@ static bool _dvmIsVolume(const devoptab_t* dotab)
 
 bool dvmUnmountVolume(const char* name)
 {
+	if (!name) {
+		return false;
+	}
+
 	char namebuf[32];
 	if (!strchr(name, ':')) {
 		size_t namelen = strnlen(name, sizeof(namebuf)-2);
