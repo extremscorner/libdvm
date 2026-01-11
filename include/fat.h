@@ -36,8 +36,8 @@ static inline void fatDeinit(void) {
 }
 
 // FAT specific filesystem functions
-void fatGetVolumeLabel(const char* name, char* label_out);
-void fatSetVolumeLabel(const char* name, const char* label);
+bool fatGetVolumeLabel(const char* name, char* label_out);
+bool fatSetVolumeLabel(const char* name, const char* label);
 int FAT_getAttr(const char* filename);
 int FAT_setAttr(const char* filename, unsigned attr);
 

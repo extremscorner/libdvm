@@ -112,7 +112,7 @@ bool dvmUnmountVolume(const char* name)
 	}
 
 	char namebuf[32];
-	if (!strchr(name, ':')) {
+	if (*name && !strchr(name, ':')) {
 		size_t namelen = strnlen(name, sizeof(namebuf)-2);
 		memcpy(namebuf, name, namelen);
 		namebuf[namelen] = ':';

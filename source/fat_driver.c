@@ -612,6 +612,30 @@ long _FAT_pathconf_r(struct _reent* r, const char* path, int name)
 	return _FAT_fpathconf_r(r, NULL, name);
 }
 
+bool fatGetVolumeLabel(const char* name, char* label_out)
+{
+	FatVolume* vol = _fatVolumeFromPath(name);
+	if (!vol) {
+		return false;
+	}
+
+	FRESULT fr = f_getlabel(&vol->fs, label_out, NULL);
+
+	return fr == FR_OK;
+}
+
+bool fatSetVolumeLabel(const char* name, const char* label)
+{
+	FatVolume* vol = _fatVolumeFromPath(name);
+	if (!vol) {
+		return false;
+	}
+
+	FRESULT fr = f_setlabel(&vol->fs, label);
+
+	return fr == FR_OK;
+}
+
 int FAT_getAttr(const char* path)
 {
 	FatVolume* vol = _fatVolumeFromPath(path);
