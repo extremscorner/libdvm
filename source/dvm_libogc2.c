@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <ogc/aram.h>
 #include <ogc/dvd.h>
 #include <ogc/system.h>
 #include <ogc/usbstorage.h>
@@ -38,17 +39,18 @@ bool dvmInit(bool set_app_cwdir, unsigned cache_pages, unsigned sectors_per_page
 {
 	unsigned num_mounted = 0;
 
+	DISC_INTERFACE* carda = get_io_gcsda();
+	DISC_INTERFACE* cardb = get_io_gcsdb();
 #if defined(__wii__)
 	DISC_INTERFACE* sd    = &__io_wiisd;
 	DISC_INTERFACE* usb   = &__io_usbstorage;
 #elif defined(__gamecube__)
 	DISC_INTERFACE* sd    = get_io_gcsd2();
 	DISC_INTERFACE* dvd   = &__io_gcode;
+	DISC_INTERFACE* ram   = &__io_aram;
 #else
 #error "Neither Wii nor GameCube"
 #endif
-	DISC_INTERFACE* carda = get_io_gcsda();
-	DISC_INTERFACE* cardb = get_io_gcsdb();
 
 #if defined(__wii__)
 	// Try mounting SD card
@@ -70,6 +72,9 @@ bool dvmInit(bool set_app_cwdir, unsigned cache_pages, unsigned sectors_per_page
 
 	// Try mounting GC Loader
 	num_mounted += dvmProbeMountDiscIface("dvd", dvd, cache_pages, sectors_per_page);
+
+	// Try mounting Memory Expansion Pak
+	num_mounted += dvmProbeMountDiscIface("ram", ram, cache_pages, sectors_per_page);
 #endif
 
 	// Set current working directory if needed
