@@ -201,7 +201,7 @@ unsigned dvmProbeMountDisc(const char* basename, DvmDisc* disc)
 	DvmPartInfo partinfo[4];
 	unsigned num_parts = dvmReadPartitionTable(disc, partinfo, 4, DVM_IDENT_FSTYPE);
 	if (!num_parts) {
-		return dvmMountVolume(basename, disc, 0, "vfat");
+		return dvmMountVolume(basename, disc, 0, "exfat") ? 1 : 0;
 	}
 
 	dvmDebug("Loaded %u partitions\n", num_parts);
@@ -220,7 +220,7 @@ unsigned dvmProbeMountDisc(const char* basename, DvmDisc* disc)
 		volname[basenamelen+0] = part->index ? ('1' + part->index) : 0;
 		volname[basenamelen+1] = 0;
 
-		if (dvmMountVolume(volname, disc, part->start_sector, part->fstype)) {
+		if (dvmMountPartition(volname, disc, part)) {
 			num_mounted ++;
 		}
 	}

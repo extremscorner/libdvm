@@ -40,11 +40,11 @@ bool dvmRegisterFsDriver(const DvmFsDriver* fsdrv)
 	return false;
 }
 
-bool dvmMountVolume(const char* name, DvmDisc* disc, sec_t start_sector, const char* fstype)
+bool dvmMountPartition(const char* name, DvmDisc* disc, DvmPartInfo* part)
 {
 	const DvmFsDriver* fsdrv = NULL;
 	for (unsigned i = 0; i < MAX_DRIVERS && s_dvmFsDrvTable[i]; i ++) {
-		if (strcmp(s_dvmFsDrvTable[i]->fstype, fstype) == 0) {
+		if (strcmp(s_dvmFsDrvTable[i]->fstype, part->fstype) == 0) {
 			fsdrv = s_dvmFsDrvTable[i];
 			break;
 		}
@@ -67,7 +67,7 @@ bool dvmMountVolume(const char* name, DvmDisc* disc, sec_t start_sector, const c
 	vol->fsdrv = fsdrv;
 	memcpy(vol->namebuf, name, strnlen(name, sizeof(vol->namebuf)));
 
-	if (!fsdrv->mount(&vol->dotab, disc, start_sector)) {
+	if (!fsdrv->mount(&vol->dotab, disc, part)) {
 		free(vol);
 		return false;
 	}
@@ -95,6 +95,18 @@ bool dvmMountVolume(const char* name, DvmDisc* disc, sec_t start_sector, const c
 	}
 
 	return true;
+}
+
+bool dvmMountVolume(const char* name, DvmDisc* disc, sec_t start_sector, const char* fstype)
+{
+	DvmPartInfo part;
+	part.index = 0;
+	part.type = 0;
+	part.fstype = fstype;
+	part.start_sector = start_sector;
+	part.num_sectors = start_sector ? ~(sec_t)0 : disc->num_sectors;
+
+	return dvmMountPartition(name, disc, &part);
 }
 
 static bool _dvmIsVolume(const devoptab_t* dotab)

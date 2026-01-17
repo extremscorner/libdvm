@@ -10,7 +10,7 @@
 #include "fat_driver.h"
 #include "dvm_debug.h"
 
-static bool _FAT_mount(devoptab_t* dotab, DvmDisc* disc, sec_t start_sector);
+static bool _FAT_mount(devoptab_t* dotab, DvmDisc* disc, DvmPartInfo* part);
 static void _FAT_umount(void* device_data);
 
 static int _FAT_open_r(struct _reent*, void*, const char*, int, int);
@@ -90,11 +90,12 @@ static FatVolume* _fatVolumeFromPath(const char* path)
 	return (FatVolume*)dotab->deviceData;
 }
 
-bool _FAT_mount(devoptab_t* dotab, DvmDisc* disc, sec_t start_sector)
+bool _FAT_mount(devoptab_t* dotab, DvmDisc* disc, DvmPartInfo* part)
 {
 	FatVolume* vol    = (FatVolume*)dotab->deviceData;
 	vol->disc         = disc;
-	vol->start_sector = start_sector;
+	vol->start_sector = part->start_sector;
+	vol->num_sectors  = part->num_sectors;
 
 	if (f_mount(&vol->fs, vol, 0) != FR_OK) {
 		return false;
@@ -774,8 +775,8 @@ DRESULT disk_ioctl(void* pdrv, BYTE cmd, void* buff)
 		}
 
 		case GET_SECTOR_COUNT: {
-			*(LBA_t*)buff = (LBA_t)disc->num_sectors;
-			return RES_OK;
+			*(LBA_t*)buff = (LBA_t)vol->num_sectors;
+			return ~vol->num_sectors ? RES_OK : RES_ERROR;
 		}
 
 		case GET_SECTOR_SIZE: {

@@ -49,7 +49,7 @@ struct DvmFsDriver {
 	const devoptab_t* dotab_template;
 	size_t device_data_sz;
 
-	bool (*mount)(devoptab_t* dotab, DvmDisc* disc, sec_t start_sector);
+	bool (*mount)(devoptab_t* dotab, DvmDisc* disc, DvmPartInfo* part);
 	void (*umount)(void* device_data);
 };
 
@@ -93,6 +93,7 @@ static inline void dvmDiscFlush(DvmDisc* disc)
 
 // Volume management
 bool dvmRegisterFsDriver(const DvmFsDriver* fsdrv);
+bool dvmMountPartition(const char* name, DvmDisc* disc, DvmPartInfo* part);
 bool dvmMountVolume(const char* name, DvmDisc* disc, sec_t start_sector, const char* fstype);
 bool dvmUnmountVolume(const char* name);
 
