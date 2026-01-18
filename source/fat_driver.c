@@ -97,7 +97,11 @@ bool _FAT_mount(devoptab_t* dotab, DvmDisc* disc, DvmPartInfo* part)
 	vol->start_sector = part->start_sector;
 	vol->num_sectors  = part->num_sectors;
 
-	if (f_mount(&vol->fs, vol, 0) != FR_OK) {
+	UINT ipart = vol->start_sector ? 0 : part->index;
+	FRESULT fr = f_mount(&vol->fs, vol, ipart);
+
+	if (fr != FR_OK) {
+		f_umount(&vol->fs);
 		return false;
 	}
 

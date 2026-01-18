@@ -138,7 +138,7 @@ static unsigned _dvmReadPartitionTable(DvmDisc* disc, DvmPartInfo* out, unsigned
 		}
 
 		DvmPartInfo* part = &out[num_parts++];
-		part->index = i;
+		part->index = i+1;
 		part->type = type;
 		part->fstype = NULL;
 		part->start_sector = _dvmRead32(mbr_part[i].start_lba_le, 0);
@@ -217,7 +217,7 @@ unsigned dvmProbeMountDisc(const char* basename, DvmDisc* disc)
 			continue;
 		}
 
-		volname[basenamelen+0] = part->index ? ('1' + part->index) : 0;
+		volname[basenamelen+0] = part->index > 1 ? ('0' + part->index) : 0;
 		volname[basenamelen+1] = 0;
 
 		if (dvmMountPartition(volname, disc, part)) {
