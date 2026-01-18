@@ -10,7 +10,8 @@
 #include "fat_driver.h"
 #include "dvm_debug.h"
 
-static bool _FAT_mount(devoptab_t* dotab, DvmDisc* disc, DvmPartInfo* part);
+static bool _FAT_mount_vfat(devoptab_t* dotab, DvmDisc* disc, DvmPartInfo* part);
+static bool _FAT_mount_exfat(devoptab_t* dotab, DvmDisc* disc, DvmPartInfo* part);
 static void _FAT_umount(void* device_data);
 
 static int _FAT_open_r(struct _reent*, void*, const char*, int, int);
@@ -68,7 +69,7 @@ const DvmFsDriver g_vfatFsDriver = {
 	.fstype         = "vfat",
 	.device_data_sz = sizeof(FatVolume),
 	.dotab_template = &_FAT_devoptab,
-	.mount          = _FAT_mount,
+	.mount          = _FAT_mount_vfat,
 	.umount         = _FAT_umount,
 };
 
@@ -76,7 +77,7 @@ const DvmFsDriver g_exfatFsDriver = {
 	.fstype         = "exfat",
 	.device_data_sz = sizeof(FatVolume),
 	.dotab_template = &_FAT_devoptab,
-	.mount          = _FAT_mount,
+	.mount          = _FAT_mount_exfat,
 	.umount         = _FAT_umount,
 };
 
@@ -90,7 +91,7 @@ static FatVolume* _fatVolumeFromPath(const char* path)
 	return (FatVolume*)dotab->deviceData;
 }
 
-bool _FAT_mount(devoptab_t* dotab, DvmDisc* disc, DvmPartInfo* part)
+bool _FAT_mount_vfat(devoptab_t* dotab, DvmDisc* disc, DvmPartInfo* part)
 {
 	FatVolume* vol    = (FatVolume*)dotab->deviceData;
 	vol->disc         = disc;
@@ -99,6 +100,69 @@ bool _FAT_mount(devoptab_t* dotab, DvmDisc* disc, DvmPartInfo* part)
 
 	UINT ipart = vol->start_sector ? 0 : part->index;
 	FRESULT fr = f_mount(&vol->fs, vol, ipart);
+
+#ifdef FEATURE_MEDIUM_CANFORMAT
+	if (fr == FR_NO_FILESYSTEM && (disc->features & FEATURE_MEDIUM_CANFORMAT)) {
+		f_umount(&vol->fs);
+
+		MKFS_PARM opt;
+		opt.fmt = FM_FAT | FM_FAT32;
+		if (ipart == 0) {
+			opt.fmt |= FM_SFD;
+		}
+		opt.n_fat = 2;
+		opt.align = 0;
+		opt.n_root = 0;
+		opt.au_size = 0;
+
+		fr = f_mkfs(vol, ipart, &opt, vol->fs.win, sizeof(vol->fs.win));
+
+		if (fr == FR_OK) {
+			fr = f_mount(&vol->fs, vol, ipart);
+		}
+	}
+#endif
+
+	if (fr != FR_OK) {
+		f_umount(&vol->fs);
+		return false;
+	}
+
+	dvmDiscAddUser(disc);
+	return true;
+}
+
+bool _FAT_mount_exfat(devoptab_t* dotab, DvmDisc* disc, DvmPartInfo* part)
+{
+	FatVolume* vol    = (FatVolume*)dotab->deviceData;
+	vol->disc         = disc;
+	vol->start_sector = part->start_sector;
+	vol->num_sectors  = part->num_sectors;
+
+	UINT ipart = vol->start_sector ? 0 : part->index;
+	FRESULT fr = f_mount(&vol->fs, vol, ipart);
+
+#ifdef FEATURE_MEDIUM_CANFORMAT
+	if (fr == FR_NO_FILESYSTEM && (disc->features & FEATURE_MEDIUM_CANFORMAT)) {
+		f_umount(&vol->fs);
+
+		MKFS_PARM opt;
+		opt.fmt = FM_EXFAT;
+		if (ipart == 0) {
+			opt.fmt |= FM_SFD;
+		}
+		opt.n_fat = 0;
+		opt.align = 0;
+		opt.n_root = 0;
+		opt.au_size = 0;
+
+		fr = f_mkfs(vol, ipart, &opt, vol->fs.win, sizeof(vol->fs.win));
+
+		if (fr == FR_OK) {
+			fr = f_mount(&vol->fs, vol, ipart);
+		}
+	}
+#endif
 
 	if (fr != FR_OK) {
 		f_umount(&vol->fs);
