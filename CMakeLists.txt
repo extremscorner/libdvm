@@ -16,6 +16,7 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 
 add_library(dvm STATIC)
+add_library(ext2fs STATIC $<TARGET_OBJECTS:lwext4>)
 add_library(fat STATIC $<TARGET_OBJECTS:dvm>)
 
 if (NOT EXISTS "${CMAKE_SOURCE_DIR}/fatfs/CMakeLists.txt")
@@ -27,9 +28,21 @@ if (NOT EXISTS "${CMAKE_SOURCE_DIR}/fatfs/CMakeLists.txt")
 	)
 endif()
 
+if (NOT EXISTS "${CMAKE_SOURCE_DIR}/lwext4/CMakeLists.txt")
+	include(FetchContent)
+	FetchContent_Populate(lwext4
+		GIT_REPOSITORY https://github.com/extremscorner/lwext4
+		GIT_TAG        dkp-mods
+		SOURCE_DIR     ${CMAKE_SOURCE_DIR}/lwext4
+	)
+endif()
+
+set(LIB_ONLY ON)
+add_subdirectory(lwext4)
 add_subdirectory(fatfs)
 
 target_compile_options(dvm PRIVATE -Wall)
+target_compile_options(ext2fs PRIVATE -Wall)
 target_compile_options(fat PRIVATE -Wall)
 
 if (NOT NINTENDO_GBA)
@@ -44,8 +57,31 @@ else()
 	)
 endif()
 
+if(NINTENDO_GAMECUBE OR NINTENDO_WII)
+	target_compile_definitions(lwext4 PUBLIC
+		CONFIG_BIG_ENDIAN
+		CONFIG_UNALIGNED_ACCESS=1
+	)
+endif()
+
+target_compile_definitions(lwext4 PUBLIC
+	# Disable GPL components
+	CONFIG_EXTENTS_ENABLE=0
+	CONFIG_XATTR_ENABLE=0
+)
+
 target_include_directories(dvm PUBLIC
 	include
+)
+
+target_include_directories(lwext4 PUBLIC
+	${lwext4_SOURCE_DIR}/include
+	${lwext4_BINARY_DIR}/include
+)
+
+target_link_libraries(ext2fs PRIVATE
+	lwext4
+	dvm
 )
 
 target_link_libraries(fat PRIVATE
@@ -58,6 +94,11 @@ target_sources(dvm PRIVATE
 	source/dvm_cache.c
 	source/dvm_volume.c
 	source/dvm_prober.c
+)
+
+target_sources(ext2fs PRIVATE
+	source/ext2_wrappers.c
+	source/ext4_driver.c
 )
 
 target_sources(fat PRIVATE
@@ -90,7 +131,7 @@ include(GNUInstallDirs)
 
 # Install the libraries
 install(
-	TARGETS dvm fat
+	TARGETS dvm ext2fs fat
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
@@ -100,6 +141,7 @@ install(
 	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 	FILES_MATCHING
 		PATTERN dvm.h
+		PATTERN ext2.h
 		PATTERN fat.h
 		${extra_install}
 )

@@ -2,3 +2,7 @@
 	path = fatfs
 	url = https://github.com/extremscorner/fatfs-mod.git
 	branch = dkp-mods
+[submodule "lwext4"]
+	path = lwext4
+	url = https://github.com/extremscorner/lwext4.git
+	branch = dkp-mods
