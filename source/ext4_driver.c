@@ -150,12 +150,15 @@ static inline const char* _ext4_strip_device(const char* path)
 	return colonpos ? &colonpos[1] : path;
 }
 
-static void _ext4_set_stat(struct stat* st, ino_t ino, struct ext4_inode* inode, Ext4Volume* vol)
+static void _ext4_set_stat(struct stat* st, struct ext4_mountpoint* mp, ino_t ino, struct ext4_inode* inode)
 {
-	struct ext4_sblock* sb = &vol->mp.fs.sb;
+	struct ext4_sblock* sb = &mp->fs.sb;
+	struct ext4_blockdev* bdev = mp->fs.bdev;
+	struct ext4_blockdev_iface* bdif = bdev->bdif;
+	DvmDisc* disc = (DvmDisc*)bdif->p_user;
 
 	// Fill device fields
-	st->st_dev = vol->disc->io_type;
+	st->st_dev = disc->io_type;
 	st->st_ino = ino;
 
 	// Fill other fields
@@ -222,12 +225,11 @@ off_t _ext4_seek_r(struct _reent* r, void* fd, off_t offset, int whence)
 int _ext4_fstat_r(struct _reent* r, void* fd, struct stat* st)
 {
 	struct ext4_inode inode;
-	Ext4Volume* vol = (Ext4Volume*)r->deviceData;
 	ext4_file* fil = (ext4_file*)fd;
 	r->_errno = ext4_raw_inode_fill2(fil->mp, fil->inode, &inode);
 
 	if (r->_errno == EOK) {
-		_ext4_set_stat(st, fil->inode, &inode, vol);
+		_ext4_set_stat(st, fil->mp, fil->inode, &inode);
 	}
 
 	return r->_errno == EOK ? 0 : -1;
@@ -241,7 +243,7 @@ int _ext4_stat_r(struct _reent* r, const char* path, struct stat* st)
 	r->_errno = ext4_raw_inode_fill(&vol->mp, _ext4_strip_device(path), &inode, &ino);
 
 	if (r->_errno == EOK) {
-		_ext4_set_stat(st, ino, &inode, vol);
+		_ext4_set_stat(st, &vol->mp, ino, &inode);
 	}
 
 	return r->_errno == EOK ? 0 : -1;
@@ -298,7 +300,6 @@ int _ext4_dirreset_r(struct _reent* r, DIR_ITER* it)
 int _ext4_dirnext_r(struct _reent* r, DIR_ITER* it, char* filename_buf, struct stat* st)
 {
 	struct ext4_inode inode;
-	Ext4Volume* vol = (Ext4Volume*)r->deviceData;
 	ext4_dir* dir = (ext4_dir*)it->dirStruct;
 	const ext4_direntry* de = ext4_dir_entry_next(dir);
 	r->_errno = de ? EOK : ENOENT;
@@ -317,7 +318,7 @@ int _ext4_dirnext_r(struct _reent* r, DIR_ITER* it, char* filename_buf, struct s
 
 		// Populate stat struct if needed
 		if (st) {
-			_ext4_set_stat(st, de->inode, &inode, vol);
+			_ext4_set_stat(st, dir->f.mp, de->inode, &inode);
 		}
 	}
 
