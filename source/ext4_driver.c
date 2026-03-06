@@ -31,6 +31,7 @@ static int _ext4_fstat_r(struct _reent*, void*, struct stat*);
 static int _ext4_stat_r(struct _reent*, const char*, struct stat*);
 static int _ext4_link_r(struct _reent* r, const char*, const char*);
 static int _ext4_unlink_r(struct _reent*, const char*);
+static int _ext4_chdir_r(struct _reent*, const char*);
 static int _ext4_rename_r(struct _reent*, const char*, const char*);
 static int _ext4_mkdir_r(struct _reent*, const char*, int);
 static DIR_ITER* _ext4_diropen_r(struct _reent*, DIR_ITER*, const char*);
@@ -57,6 +58,7 @@ static const devoptab_t _ext4_devoptab = {
 	.stat_r       = _ext4_stat_r,
 	.link_r       = _ext4_link_r,
 	.unlink_r     = _ext4_unlink_r,
+	.chdir_r      = _ext4_chdir_r,
 	.rename_r     = _ext4_rename_r,
 	.mkdir_r      = _ext4_mkdir_r,
 	.dirStateSize = sizeof(ext4_dir),
@@ -261,6 +263,14 @@ int _ext4_unlink_r(struct _reent* r, const char* path)
 {
 	Ext4Volume* vol = (Ext4Volume*)r->deviceData;
 	r->_errno = ext4_fremove(&vol->mp, _ext4_strip_device(path));
+
+	return r->_errno == EOK ? 0 : -1;
+}
+
+int _ext4_chdir_r(struct _reent* r, const char* path)
+{
+	Ext4Volume* vol = (Ext4Volume*)r->deviceData;
+	r->_errno = ext4_dir_ch(&vol->mp, _ext4_strip_device(path));
 
 	return r->_errno == EOK ? 0 : -1;
 }
