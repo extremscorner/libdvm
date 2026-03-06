@@ -174,11 +174,11 @@ static void _ext4_set_stat(struct stat* st, struct ext4_mountpoint* mp, ino_t in
 	// Fill file times
 	st->st_atime = ext4_inode_get_access_time(inode);
 	st->st_mtime = ext4_inode_get_modif_time(inode);
-	st->st_ctime = 0;
+	st->st_ctime = ext4_inode_get_change_inode_time(inode);
 
 	// Fill sector-wise information
 	st->st_blksize = ext4_sb_get_block_size(sb);
-	st->st_blocks  = ((st->st_size + st->st_blksize - 1) & ~((off_t)st->st_blksize - 1)) / S_BLKSIZE;
+	st->st_blocks  = (ext4_inode_get_blocks_count(sb, inode) * EXT4_INODE_BLOCK_SIZE + S_BLKSIZE - 1) / S_BLKSIZE;
 }
 
 int _ext4_open_r(struct _reent* r, void* fd, const char* path, int flags, int mode)
