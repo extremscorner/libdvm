@@ -665,6 +665,9 @@ long _FAT_fpathconf_r(struct _reent* r, void* fd, int name)
 		case _PC_FILESIZEBITS:
 			return vol->fs.fs_type != FS_EXFAT ? 33 : 64;
 
+		case _PC_2_SYMLINKS:
+			return 0;
+
 		case _PC_ALLOC_SIZE_MIN:
 			return vol->fs.csize * vol->fs.ssize;
 

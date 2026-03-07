@@ -44,6 +44,8 @@ static int _ext4_fsync_r(struct _reent*, void*);
 static int _ext4_chmod_r(struct _reent*, const char*, mode_t);
 static int _ext4_rmdir_r(struct _reent*, const char*);
 static int _ext4_utimes_r(struct _reent*, const char*, const struct timeval[2]);
+static long _ext4_fpathconf_r(struct _reent*, void*, int);
+static long _ext4_pathconf_r(struct _reent*, const char*, int);
 static int _ext4_symlink_r(struct _reent*, const char*, const char*);
 static ssize_t _ext4_readlink_r(struct _reent*, const char*, char*, size_t);
 
@@ -73,6 +75,8 @@ static const devoptab_t _ext4_devoptab = {
 	.rmdir_r      = _ext4_rmdir_r,
 	.lstat_r      = _ext4_stat_r,
 	.utimes_r     = _ext4_utimes_r,
+	.fpathconf_r  = _ext4_fpathconf_r,
+	.pathconf_r   = _ext4_pathconf_r,
 	.symlink_r    = _ext4_symlink_r,
 	.readlink_r   = _ext4_readlink_r,
 };
@@ -430,6 +434,49 @@ int _ext4_utimes_r(struct _reent* r, const char* path, const struct timeval time
 	ext4_cache_write_back(&vol->mp, false);
 
 	return r->_errno == EOK ? 0 : -1;
+}
+
+long _ext4_fpathconf_r(struct _reent* r, void* fd, int name)
+{
+	Ext4Volume* vol = (Ext4Volume*)r->deviceData;
+
+	switch (name) {
+		default:
+			r->_errno = EINVAL;
+			return -1;
+
+		case _PC_LINK_MAX:
+			return EXT4_LINK_MAX;
+
+		case _PC_NAME_MAX:
+			return EXT4_DIRECTORY_FILENAME_LEN;
+
+		case _PC_PATH_MAX:
+			return PATH_MAX;
+
+		case _PC_NO_TRUNC:
+			return 1;
+
+		case _PC_FILESIZEBITS:
+			return ext4_get32(&vol->mp.fs.sb, rev_level) == 0 ? 32 : 64;
+
+		case _PC_2_SYMLINKS:
+			return 1;
+
+		case _PC_ALLOC_SIZE_MIN:
+			return ext4_sb_get_block_size(&vol->mp.fs.sb);
+
+		case _PC_REC_XFER_ALIGN:
+			return LIBDVM_BUFFER_ALIGN;
+
+		case _PC_TIMESTAMP_RESOLUTION:
+			return 1000000000L;
+	}
+}
+
+long _ext4_pathconf_r(struct _reent* r, const char* path, int name)
+{
+	return _ext4_fpathconf_r(r, NULL, name);
 }
 
 int _ext4_symlink_r(struct _reent* r, const char* target, const char* path)
