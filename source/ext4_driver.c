@@ -191,12 +191,17 @@ int _ext4_open_r(struct _reent* r, void* fd, const char* path, int flags, int mo
 	ext4_file* fil = (ext4_file*)fd;
 	r->_errno = ext4_fopen2(fil, &vol->mp, _ext4_strip_device(path), flags);
 
+	if (r->_errno == EOK) {
+		r->_errno = ext4_cache_write_back(fil->mp, true);
+	}
+
 	return r->_errno == EOK ? 0 : -1;
 }
 
 int _ext4_close_r(struct _reent* r, void* fd)
 {
 	ext4_file* fil = (ext4_file*)fd;
+	ext4_cache_write_back(fil->mp, false);
 	r->_errno = ext4_fclose(fil);
 
 	return r->_errno == EOK ? 0 : -1;
