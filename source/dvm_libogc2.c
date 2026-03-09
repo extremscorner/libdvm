@@ -11,6 +11,10 @@
 #include <sdcard/wiisd_io.h>
 #include <dvm.h>
 
+extern const DvmFsDriver g_vfatFsDriver __attribute__((weak));
+extern const DvmFsDriver g_exfatFsDriver __attribute__((weak));
+extern const DvmFsDriver g_ext2FsDriver __attribute__((weak));
+
 __attribute__((weak)) unsigned g_dvmDefaultCachePages = 32;
 __attribute__((weak)) unsigned g_dvmDefaultSectorsPerPage = 8;
 
@@ -52,6 +56,15 @@ bool dvmInit(bool set_app_cwdir, unsigned cache_pages, unsigned sectors_per_page
 #error "Neither Wii nor GameCube"
 #endif
 
+	// Register FAT12/FAT16/FAT32 driver
+	dvmRegisterFsDriver(&g_vfatFsDriver);
+
+	// Register exFAT driver
+	dvmRegisterFsDriver(&g_exfatFsDriver);
+
+	// Register ext2/ext3/ext4 driver
+	dvmRegisterFsDriver(&g_ext2FsDriver);
+
 #if defined(__wii__)
 	// Try mounting SD card
 	num_mounted += dvmProbeMountDiscIface("sd", sd, cache_pages, sectors_per_page);
@@ -89,7 +102,7 @@ bool dvmInit(bool set_app_cwdir, unsigned cache_pages, unsigned sectors_per_page
 		}
 	}
 
-	// Register reset function
+	// Register system reset callback
 	if (num_mounted != 0) {
 		SYS_RegisterResetFunc(&s_dvmResetInfo);
 	}
@@ -110,5 +123,6 @@ void dvmDeinit(void)
 		}
 	}
 
+	// Unregister system reset callback
 	SYS_UnregisterResetFunc(&s_dvmResetInfo);
 }

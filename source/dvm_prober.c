@@ -6,6 +6,8 @@
 #include <dvm.h>
 #include "dvm_debug.h"
 
+#define MIN_BUF_SZ 2048U
+
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define le16(x) (x)
 #define le32(x) (x)
@@ -90,13 +92,19 @@ static const char* _dvmIdentMbrVbr(const void* buf)
 		}
 	}
 
-	// Otherwise: assume MBR if signature is present
-	return has_signature ? "" : NULL;
+	// Assume MBR if signature is present
+	if (has_signature) {
+		return "";
+	} else if (_dvmRead16(buf, 0x438) == 0xef53) {
+		return "ext2";
+	}
+
+	return NULL;
 }
 
-static unsigned _dvmReadPartitionTable(DvmDisc* disc, DvmPartInfo* out, unsigned max_partitions, unsigned flags, void* buf)
+static unsigned _dvmReadPartitionTable(DvmDisc* disc, DvmPartInfo* out, unsigned max_partitions, unsigned flags, void* buf, size_t buf_sz)
 {
-	if (!disc->vt->read_sectors(disc, buf, 0, 1)) {
+	if (!disc->vt->read_sectors(disc, buf, 0, buf_sz / disc->sector_sz)) {
 		dvmDebug("Disc read error\n");
 		return 0;
 	}
@@ -164,7 +172,7 @@ static unsigned _dvmReadPartitionTable(DvmDisc* disc, DvmPartInfo* out, unsigned
 	if (flags & DVM_IDENT_FSTYPE) {
 		for (unsigned i = 0; i < num_parts; i ++) {
 			dvmDebug("[%u:%.2X] 0x%lx 0x%lx\n", out[i].index, out[i].type, out[i].start_sector, out[i].num_sectors);
-			if (!disc->vt->read_sectors(disc, buf, out[i].start_sector, 1)) {
+			if (!disc->vt->read_sectors(disc, buf, out[i].start_sector, buf_sz / disc->sector_sz)) {
 				dvmDebug("Disc read error\n");
 				return 0;
 			}
@@ -187,9 +195,10 @@ unsigned dvmReadPartitionTable(DvmDisc* disc, DvmPartInfo* out, unsigned max_par
 	}
 
 	unsigned num_parts = 0;
-	void* buf = aligned_alloc(LIBDVM_BUFFER_ALIGN, disc->sector_sz);
+	size_t buf_sz = disc->sector_sz < MIN_BUF_SZ ? MIN_BUF_SZ : disc->sector_sz;
+	void* buf = aligned_alloc(LIBDVM_BUFFER_ALIGN, buf_sz);
 	if (buf) {
-		num_parts = _dvmReadPartitionTable(disc, out, max_partitions, flags, buf);
+		num_parts = _dvmReadPartitionTable(disc, out, max_partitions, flags, buf, buf_sz);
 		free(buf);
 	}
 
