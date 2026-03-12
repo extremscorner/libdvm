@@ -841,8 +841,7 @@ DRESULT disk_ioctl(void* pdrv, BYTE cmd, void* buff)
 		}
 
 		case CTRL_SYNC: {
-			disc->vt->flush(disc);
-			return RES_OK;
+			return disc->vt->flush(disc) ? RES_OK : RES_ERROR;
 		}
 
 		case GET_SECTOR_COUNT: {

@@ -25,7 +25,7 @@ void _dvmCacheCopy(void* dst, const void* src, size_t size)
 	}
 }
 
-static void _dvmDiscCalicoDummy(DvmDisc* self_)
+static void _dvmDiscCalicoDestroy(DvmDisc* self_)
 {
 	// Nothing
 }
@@ -42,11 +42,17 @@ static bool _dvmDiscCalicoWriteSectors(DvmDisc* self, const void* buffer, sec_t 
 	return blkDevWriteSectors(dev, buffer, first_sector, num_sectors);
 }
 
+static bool _dvmDiscCalicoFlush(DvmDisc* self_)
+{
+	// Nothing
+	return true;
+}
+
 static const DvmDiscIface s_dvmDiscCalicoIface = {
-	.destroy       = _dvmDiscCalicoDummy,
+	.destroy       = _dvmDiscCalicoDestroy,
 	.read_sectors  = _dvmDiscCalicoReadSectors,
 	.write_sectors = _dvmDiscCalicoWriteSectors,
-	.flush         = _dvmDiscCalicoDummy,
+	.flush         = _dvmDiscCalicoFlush,
 };
 
 static DvmDisc s_dvmDiscDldi = {

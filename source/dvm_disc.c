@@ -41,8 +41,14 @@ static bool _dvmDiscWrapWriteSectors(DvmDisc* self_, const void* buffer, sec_t f
 #endif
 }
 
-static void _dvmDiscWrapFlush(DvmDisc* self_)
+static bool _dvmDiscWrapFlush(DvmDisc* self_)
 {
+#if defined(__gamecube__) || defined(__wii__)
+	DvmDiscWrap* self = (DvmDiscWrap*)self_;
+	return self->iface->flush(self->iface);
+#else
+	return true;
+#endif
 }
 
 static const DvmDiscIface s_dvmDiscWrapIface = {

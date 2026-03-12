@@ -113,23 +113,25 @@ static bool _dvmDiscCacheEntryFlush(DvmDiscCache* self, DvmDiscCacheEntry* p)
 	return ret;
 }
 
-static void _dvmDiscCacheFlush(DvmDisc* self_)
+static bool _dvmDiscCacheFlush(DvmDisc* self_)
 {
 	DvmDiscCache* self = (DvmDiscCache*)self_;
 	__lock_acquire(self->lock);
 	dvmDebug("cacheFlush()\n");
 
+	bool ret = true;
 	for (DvmDiscCacheEntry* p = self->list.next; p; p = p->link.next) {
 		// Early exit if we find an unallocated cache entry
 		if (p->base_sector == LIBDVM_EMPTY_PAGE) {
 			break;
 		}
 
-		_dvmDiscCacheEntryFlush(self, p);
+		ret &= _dvmDiscCacheEntryFlush(self, p);
 	}
 
-	dvmDiscFlush(self->inner);
+	ret &= dvmDiscFlush(self->inner);
 	__lock_release(self->lock);
+	return ret;
 }
 
 static void _dvmDiscCacheDestroy(DvmDisc* self_)

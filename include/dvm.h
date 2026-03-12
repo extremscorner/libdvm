@@ -41,7 +41,7 @@ struct DvmDiscIface {
 	void (*destroy)(DvmDisc* self);
 	bool (*read_sectors)(DvmDisc* self, void* buffer, sec_t sectors, sec_t num_sectors);
 	bool (*write_sectors)(DvmDisc* self, const void* buffer, sec_t sectors, sec_t num_sectors);
-	void (*flush)(DvmDisc* self);
+	bool (*flush)(DvmDisc* self);
 };
 
 struct DvmFsDriver {
@@ -86,9 +86,9 @@ static inline bool dvmDiscWriteSectors(DvmDisc* disc, const void* buffer, sec_t 
 	return disc->vt->write_sectors(disc, buffer, sectors, num_sectors);
 }
 
-static inline void dvmDiscFlush(DvmDisc* disc)
+static inline bool dvmDiscFlush(DvmDisc* disc)
 {
-	disc->vt->flush(disc);
+	return disc->vt->flush(disc);
 }
 
 // Volume management

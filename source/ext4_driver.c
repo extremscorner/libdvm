@@ -549,8 +549,7 @@ int _ext4_dev_flush(struct ext4_blockdev* bdev)
 	struct ext4_blockdev_iface* bdif = bdev->bdif;
 	DvmDisc* disc = (DvmDisc*)bdif->p_user;
 
-	disc->vt->flush(disc);
-	return EOK;
+	return disc->vt->flush(disc) ? EOK : EIO;
 }
 
 int _ext4_dev_close(struct ext4_blockdev* bdev)
