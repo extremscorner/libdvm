@@ -25,6 +25,7 @@ if (NOT EXISTS "${CMAKE_SOURCE_DIR}/fatfs/CMakeLists.txt")
 		GIT_REPOSITORY https://github.com/extremscorner/fatfs-mod
 		GIT_TAG        dkp-mods
 		SOURCE_DIR     ${CMAKE_SOURCE_DIR}/fatfs
+		BINARY_DIR     ${CMAKE_BINARY_DIR}/fatfs
 	)
 endif()
 
@@ -34,6 +35,7 @@ if (NOT EXISTS "${CMAKE_SOURCE_DIR}/lwext4/CMakeLists.txt")
 		GIT_REPOSITORY https://github.com/extremscorner/lwext4
 		GIT_TAG        dkp-mods
 		SOURCE_DIR     ${CMAKE_SOURCE_DIR}/lwext4
+		BINARY_DIR     ${CMAKE_BINARY_DIR}/lwext4
 	)
 endif()
 
