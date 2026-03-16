@@ -117,19 +117,19 @@ bool _ext4_mount(devoptab_t* dotab, DvmDisc* disc, DvmPartInfo* part)
 	vol->bdev.part_offset = (uint64_t)part->start_sector * disc->sector_sz;
 	vol->bdev.part_size   = (uint64_t)part->num_sectors * disc->sector_sz;
 
-	int r = ext4_mount(&vol->bdev, &vol->mp, !(disc->features & FEATURE_MEDIUM_CANWRITE));
-	if (r != EOK) {
+	int rc = ext4_mount(&vol->bdev, &vol->mp, !(disc->features & FEATURE_MEDIUM_CANWRITE));
+	if (rc != EOK) {
 		return false;
 	}
 
-	r = ext4_recover(&vol->mp);
-	if (r != EOK && r != ENOTSUP) {
+	rc = ext4_recover(&vol->mp);
+	if (rc != EOK && rc != ENOTSUP) {
 		ext4_umount(&vol->mp);
 		return false;
 	}
 
-	r = ext4_journal_start(&vol->mp);
-	if (r != EOK) {
+	rc = ext4_journal_start(&vol->mp);
+	if (rc != EOK) {
 		ext4_umount(&vol->mp);
 		return false;
 	}
