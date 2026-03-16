@@ -310,6 +310,8 @@ static const DvmDiscIface s_dvmDiscCacheIface = {
 
 DvmDisc* dvmDiscCacheCreate(DvmDisc* inner_disc, unsigned cache_pages, unsigned sectors_per_page)
 {
+	sectors_per_page = sectors_per_page*512U / inner_disc->sector_sz;
+
 	// Parameter validation
 	if (!cache_pages || !sectors_per_page || (sectors_per_page & (sectors_per_page-1))) {
 		return inner_disc;
