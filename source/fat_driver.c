@@ -644,6 +644,7 @@ int _FAT_utimes_r(struct _reent* r, const char* path, const struct timeval times
 long _FAT_fpathconf_r(struct _reent* r, void* fd, int name)
 {
 	FatVolume* vol = (FatVolume*)r->deviceData;
+	DvmDisc* disc = vol->disc;
 
 	switch (name) {
 		default:
@@ -670,6 +671,9 @@ long _FAT_fpathconf_r(struct _reent* r, void* fd, int name)
 
 		case _PC_ALLOC_SIZE_MIN:
 			return vol->fs.csize * vol->fs.ssize;
+
+		case _PC_REC_MIN_XFER_SIZE:
+			return disc->block_sz ? disc->block_sz * disc->sector_sz : disc->sector_sz;
 
 		case _PC_REC_XFER_ALIGN:
 			return LIBDVM_BUFFER_ALIGN;
@@ -851,6 +855,11 @@ DRESULT disk_ioctl(void* pdrv, BYTE cmd, void* buff)
 
 		case GET_SECTOR_SIZE: {
 			*(WORD*)buff = (WORD)disc->sector_sz;
+			return RES_OK;
+		}
+
+		case GET_BLOCK_SIZE: {
+			*(DWORD*)buff = (DWORD)disc->block_sz;
 			return RES_OK;
 		}
 	}

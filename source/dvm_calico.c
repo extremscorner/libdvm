@@ -56,20 +56,23 @@ static const DvmDiscIface s_dvmDiscCalicoIface = {
 };
 
 static DvmDisc s_dvmDiscDldi = {
-	.vt       = &s_dvmDiscCalicoIface,
-	.io_type  = BlkDevice_Dldi,
+	.vt        = &s_dvmDiscCalicoIface,
+	.io_type   = BlkDevice_Dldi,
+	.sector_sz = 512U,
 };
 
 static DvmDisc s_dvmDiscSd = {
-	.vt       = &s_dvmDiscCalicoIface,
-	.io_type  = BlkDevice_TwlSdCard,
-	.features = FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE,
+	.vt        = &s_dvmDiscCalicoIface,
+	.io_type   = BlkDevice_TwlSdCard,
+	.features  = FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE,
+	.sector_sz = 512U,
 };
 
 static DvmDisc s_dvmDiscNand = {
-	.vt       = &s_dvmDiscCalicoIface,
-	.io_type  = BlkDevice_TwlNandAes,
-	.features = FEATURE_MEDIUM_CANREAD,
+	.vt        = &s_dvmDiscCalicoIface,
+	.io_type   = BlkDevice_TwlNandAes,
+	.features  = FEATURE_MEDIUM_CANREAD,
+	.sector_sz = 512U,
 };
 
 static DvmDisc* _dvmGetCalicoDisc(DvmDisc* disc, unsigned cache_pages, unsigned sectors_per_page)
@@ -88,7 +91,6 @@ static DvmDisc* _dvmGetCalicoDisc(DvmDisc* disc, unsigned cache_pages, unsigned 
 
 	// Populate disc size
 	disc->num_sectors = blkDevGetSectorCount(dev);
-	disc->sector_sz = 512U;
 
 	// Create disc cache
 	disc = dvmDiscCacheCreate(disc, cache_pages, sectors_per_page);

@@ -444,6 +444,7 @@ int _ext4_utimes_r(struct _reent* r, const char* path, const struct timeval time
 long _ext4_fpathconf_r(struct _reent* r, void* fd, int name)
 {
 	Ext4Volume* vol = (Ext4Volume*)r->deviceData;
+	DvmDisc* disc = vol->disc;
 
 	switch (name) {
 		default:
@@ -470,6 +471,9 @@ long _ext4_fpathconf_r(struct _reent* r, void* fd, int name)
 
 		case _PC_ALLOC_SIZE_MIN:
 			return ext4_sb_get_block_size(&vol->mp.fs.sb);
+
+		case _PC_REC_MIN_XFER_SIZE:
+			return disc->block_sz ? disc->block_sz * disc->sector_sz : disc->sector_sz;
 
 		case _PC_REC_XFER_ALIGN:
 			return LIBDVM_BUFFER_ALIGN;

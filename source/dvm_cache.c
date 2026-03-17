@@ -311,6 +311,9 @@ static const DvmDiscIface s_dvmDiscCacheIface = {
 DvmDisc* dvmDiscCacheCreate(DvmDisc* inner_disc, unsigned cache_pages, unsigned sectors_per_page)
 {
 	sectors_per_page = sectors_per_page*512U / inner_disc->sector_sz;
+	if (sectors_per_page < inner_disc->block_sz) {
+		sectors_per_page = inner_disc->block_sz;
+	}
 
 	// Parameter validation
 	if (!cache_pages || !sectors_per_page || (sectors_per_page & (sectors_per_page-1))) {
@@ -334,6 +337,7 @@ DvmDisc* dvmDiscCacheCreate(DvmDisc* inner_disc, unsigned cache_pages, unsigned 
 	disc->base.features = inner_disc->features;
 	disc->base.num_sectors = inner_disc->num_sectors;
 	disc->base.sector_sz = inner_disc->sector_sz;
+	disc->base.block_sz = sectors_per_page;
 	__lock_init(disc->lock);
 	dvmDiscAddUser(inner_disc);
 	disc->inner = inner_disc;

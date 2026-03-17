@@ -70,7 +70,7 @@ DvmDisc* dvmDiscCreate(DISC_INTERFACE* iface)
 		return NULL;
 	}
 
-	if (iface->numberOfSectors == 0 || iface->bytesPerSector < 512U) {
+	if (iface->numberOfSectors == 0 || iface->bytesPerSector < 512U || (iface->sectorsPerBlock & (iface->sectorsPerBlock-1))) {
 		iface->shutdown(iface);
 		return NULL;
 	}
@@ -89,9 +89,11 @@ DvmDisc* dvmDiscCreate(DISC_INTERFACE* iface)
 #if defined(__gamecube__) || defined(__wii__)
 		disc->base.num_sectors = iface->numberOfSectors;
 		disc->base.sector_sz = iface->bytesPerSector;
+		disc->base.block_sz = iface->sectorsPerBlock;
 #else
 		disc->base.num_sectors = ~(sec_t)0;
 		disc->base.sector_sz = 512U;
+		disc->base.block_sz = 0;
 #endif
 		disc->iface = iface;
 	}
