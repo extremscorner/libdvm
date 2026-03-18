@@ -222,7 +222,7 @@ _cacheHit:
 		}
 
 		// Partial access or misaligned access:
-		else if (!is_whole || !is_aligned) {
+		else if (!is_aligned || num_sectors < page_sz) {
 			p = self->list.prev;
 			while (p->base_sector == LIBDVM_EMPTY_PAGE && p->link.prev && p->link.prev->base_sector == LIBDVM_EMPTY_PAGE) {
 				p = p->link.prev;
