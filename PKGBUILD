@@ -2,14 +2,14 @@
 
 _pkgname=libdvm
 pkgname="libogc2-${_pkgname}-git"
-pkgver=r55.2949b3b
+pkgver=r81.f7c9e36
 pkgrel=1
 pkgdesc='FAT and disk/volume management library for GameCube and Wii.'
 arch=('any')
 url='https://github.com/extremscorner/libdvm'
 license=('ZPL-2.1')
 groups=('gamecube-dev' 'wii-dev')
-depends=('devkitPPC>=r42' 'libogc2')
+depends=('devkitPPC>=r49' 'libogc2')
 makedepends=('catnip' 'cmake' 'git' 'libogc2-cmake' 'ninja')
 provides=("libogc2-${_pkgname}" 'libogc2-libfat')
 conflicts=("libogc2-${_pkgname}" 'libogc2-libfat')
@@ -35,5 +35,6 @@ package() {
 	DESTDIR="${pkgdir}" catnip install gamecube wii
 	for platform in gamecube wii; do
 		install -Dm 644 COPYING -t "${pkgdir}${DEVKITPRO}/libogc2/${platform}/share/licenses/${_pkgname}"
+		install -Dm 644 lwext4/LICENSE -t "${pkgdir}${DEVKITPRO}/libogc2/${platform}/share/licenses/lwext4"
 	done
 }
