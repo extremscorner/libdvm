@@ -30,13 +30,13 @@ static void _dvmDiscCalicoDestroy(DvmDisc* self_)
 	// Nothing
 }
 
-static bool _dvmDiscCalicoReadSectors(DvmDisc* self, void* buffer, sec_t first_sector, sec_t num_sectors)
+static bool _dvmDiscCalicoReadSectors(DvmDisc* self, void* buffer, sec_t first_sector, sec_t num_sectors, bool is_partial)
 {
 	BlkDevice dev = (BlkDevice)self->io_type;
 	return blkDevReadSectors(dev, buffer, first_sector, num_sectors);
 }
 
-static bool _dvmDiscCalicoWriteSectors(DvmDisc* self, const void* buffer, sec_t first_sector, sec_t num_sectors)
+static bool _dvmDiscCalicoWriteSectors(DvmDisc* self, const void* buffer, sec_t first_sector, sec_t num_sectors, bool is_partial)
 {
 	BlkDevice dev = (BlkDevice)self->io_type;
 	return blkDevWriteSectors(dev, buffer, first_sector, num_sectors);

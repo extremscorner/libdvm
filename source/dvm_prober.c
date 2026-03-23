@@ -104,7 +104,7 @@ static const char* _dvmIdentMbrVbr(const void* buf)
 
 static unsigned _dvmReadPartitionTable(DvmDisc* disc, DvmPartInfo* out, unsigned max_partitions, unsigned flags, void* buf, size_t buf_sz)
 {
-	if (!disc->vt->read_sectors(disc, buf, 0, buf_sz / disc->sector_sz)) {
+	if (!disc->vt->read_sectors(disc, buf, 0, buf_sz / disc->sector_sz, true)) {
 		dvmDebug("Disc read error\n");
 		return 0;
 	}
@@ -172,7 +172,7 @@ static unsigned _dvmReadPartitionTable(DvmDisc* disc, DvmPartInfo* out, unsigned
 	if (flags & DVM_IDENT_FSTYPE) {
 		for (unsigned i = 0; i < num_parts; i ++) {
 			dvmDebug("[%u:%.2X] 0x%lx 0x%lx\n", out[i].index, out[i].type, out[i].start_sector, out[i].num_sectors);
-			if (!disc->vt->read_sectors(disc, buf, out[i].start_sector, buf_sz / disc->sector_sz)) {
+			if (!disc->vt->read_sectors(disc, buf, out[i].start_sector, buf_sz / disc->sector_sz, true)) {
 				dvmDebug("Disc read error\n");
 				return 0;
 			}

@@ -147,7 +147,7 @@ static void _dvmDiscCacheDestroy(DvmDisc* self_)
 
 static bool _dvmDiscCacheReadWrite(
 	DvmDiscCache* self, uint8_t* buffer, sec_t first_sector, sec_t num_sectors,
-	bool is_write)
+	bool is_partial, bool is_write)
 {
 	// Early fail on first sector being out of bounds
 	if (first_sector >= self->base.num_sectors) {
@@ -163,6 +163,8 @@ static bool _dvmDiscCacheReadWrite(
 	const bool is_aligned = _dvmIsAlignedAccess(buffer, is_write);
 	const unsigned page_sz = 1U << self->page_shift;
 	const unsigned page_mask = page_sz - 1;
+
+	is_partial |= num_sectors < page_sz;
 
 	DvmDiscCacheEntry* p = NULL;
 	sec_t search_base = 0;
@@ -222,7 +224,7 @@ _cacheHit:
 		}
 
 		// Partial access or misaligned access:
-		else if (!is_aligned || num_sectors < page_sz) {
+		else if (is_partial || !is_aligned) {
 			p = self->list.prev;
 			while (p->base_sector == LIBDVM_EMPTY_PAGE && p->link.prev && p->link.prev->base_sector == LIBDVM_EMPTY_PAGE) {
 				p = p->link.prev;
@@ -281,22 +283,22 @@ _cacheHit:
 	return true;
 }
 
-static bool _dvmDiscCacheReadSectors(DvmDisc* self_, void* buffer, sec_t first_sector, sec_t num_sectors)
+static bool _dvmDiscCacheReadSectors(DvmDisc* self_, void* buffer, sec_t first_sector, sec_t num_sectors, bool is_partial)
 {
 	DvmDiscCache* self = (DvmDiscCache*)self_;
 	__lock_acquire(self->lock);
 	dvmDebug("cacheRead(%p,0x%lx,%lu)\n", buffer, first_sector, num_sectors);
-	bool ret = _dvmDiscCacheReadWrite(self, (uint8_t*)buffer, first_sector, num_sectors, false);
+	bool ret = _dvmDiscCacheReadWrite(self, (uint8_t*)buffer, first_sector, num_sectors, is_partial, false);
 	__lock_release(self->lock);
 	return ret;
 }
 
-static bool _dvmDiscCacheWriteSectors(DvmDisc* self_, const void* buffer, sec_t first_sector, sec_t num_sectors)
+static bool _dvmDiscCacheWriteSectors(DvmDisc* self_, const void* buffer, sec_t first_sector, sec_t num_sectors, bool is_partial)
 {
 	DvmDiscCache* self = (DvmDiscCache*)self_;
 	__lock_acquire(self->lock);
 	dvmDebug("cacheWrite(%p,0x%lx,%lu)\n", buffer, first_sector, num_sectors);
-	bool ret = _dvmDiscCacheReadWrite(self, (uint8_t*)buffer, first_sector, num_sectors, true);
+	bool ret = _dvmDiscCacheReadWrite(self, (uint8_t*)buffer, first_sector, num_sectors, is_partial, true);
 	__lock_release(self->lock);
 	return ret;
 }

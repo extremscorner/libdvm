@@ -816,22 +816,22 @@ DSTATUS disk_status(void* pdrv)
 	return status;
 }
 
-DRESULT disk_read(void* pdrv, BYTE* buff, LBA_t sector_, UINT count)
+DRESULT disk_read(void* pdrv, BYTE* buff, LBA_t sector_, UINT count, BYTE opt)
 {
 	FatVolume* vol = (FatVolume*)pdrv;
 	DvmDisc* disc = vol->disc;
 	sec_t sector = vol->start_sector + (sec_t)sector_;
 
-	return disc->vt->read_sectors(disc, buff, sector, count) ? RES_OK : RES_ERROR;
+	return disc->vt->read_sectors(disc, buff, sector, count, opt) ? RES_OK : RES_ERROR;
 }
 
-DRESULT disk_write(void* pdrv, const BYTE* buff, LBA_t sector_, UINT count)
+DRESULT disk_write(void* pdrv, const BYTE* buff, LBA_t sector_, UINT count, BYTE opt)
 {
 	FatVolume* vol = (FatVolume*)pdrv;
 	DvmDisc* disc = vol->disc;
 	sec_t sector = vol->start_sector + (sec_t)sector_;
 
-	return disc->vt->write_sectors(disc, buff, sector, count) ? RES_OK : RES_ERROR;
+	return disc->vt->write_sectors(disc, buff, sector, count, opt) ? RES_OK : RES_ERROR;
 }
 
 DRESULT disk_ioctl(void* pdrv, BYTE cmd, void* buff)

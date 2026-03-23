@@ -21,7 +21,7 @@ static void _dvmDiscWrapDestroy(DvmDisc* self_)
 	free(self);
 }
 
-static bool _dvmDiscWrapReadSectors(DvmDisc* self_, void* buffer, sec_t first_sector, sec_t num_sectors)
+static bool _dvmDiscWrapReadSectors(DvmDisc* self_, void* buffer, sec_t first_sector, sec_t num_sectors, bool is_partial)
 {
 	DvmDiscWrap* self = (DvmDiscWrap*)self_;
 #if defined(__gamecube__) || defined(__wii__)
@@ -31,7 +31,7 @@ static bool _dvmDiscWrapReadSectors(DvmDisc* self_, void* buffer, sec_t first_se
 #endif
 }
 
-static bool _dvmDiscWrapWriteSectors(DvmDisc* self_, const void* buffer, sec_t first_sector, sec_t num_sectors)
+static bool _dvmDiscWrapWriteSectors(DvmDisc* self_, const void* buffer, sec_t first_sector, sec_t num_sectors, bool is_partial)
 {
 	DvmDiscWrap* self = (DvmDiscWrap*)self_;
 #if defined(__gamecube__) || defined(__wii__)

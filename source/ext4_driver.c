@@ -537,7 +537,7 @@ int _ext4_dev_bread(struct ext4_blockdev* bdev, void* buf, uint64_t blk_id, uint
 	struct ext4_blockdev_iface* bdif = bdev->bdif;
 	DvmDisc* disc = (DvmDisc*)bdif->p_user;
 
-	return disc->vt->read_sectors(disc, buf, blk_id, blk_cnt) ? EOK : EIO;
+	return disc->vt->read_sectors(disc, buf, blk_id, blk_cnt, bdif->ph_bbuf == buf) ? EOK : EIO;
 }
 
 int _ext4_dev_bwrite(struct ext4_blockdev* bdev, const void* buf, uint64_t blk_id, uint32_t blk_cnt)
@@ -545,7 +545,7 @@ int _ext4_dev_bwrite(struct ext4_blockdev* bdev, const void* buf, uint64_t blk_i
 	struct ext4_blockdev_iface* bdif = bdev->bdif;
 	DvmDisc* disc = (DvmDisc*)bdif->p_user;
 
-	return disc->vt->write_sectors(disc, buf, blk_id, blk_cnt) ? EOK : EIO;
+	return disc->vt->write_sectors(disc, buf, blk_id, blk_cnt, bdif->ph_bbuf == buf) ? EOK : EIO;
 }
 
 int _ext4_dev_flush(struct ext4_blockdev* bdev)

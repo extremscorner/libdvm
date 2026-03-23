@@ -40,8 +40,8 @@ struct DvmDisc {
 
 struct DvmDiscIface {
 	void (*destroy)(DvmDisc* self);
-	bool (*read_sectors)(DvmDisc* self, void* buffer, sec_t sectors, sec_t num_sectors);
-	bool (*write_sectors)(DvmDisc* self, const void* buffer, sec_t sectors, sec_t num_sectors);
+	bool (*read_sectors)(DvmDisc* self, void* buffer, sec_t first_sector, sec_t num_sectors, bool is_partial);
+	bool (*write_sectors)(DvmDisc* self, const void* buffer, sec_t first_sector, sec_t num_sectors, bool is_partial);
 	bool (*flush)(DvmDisc* self);
 };
 
@@ -77,14 +77,14 @@ DvmDisc* dvmDiscCacheCreate(DvmDisc* inner_disc, unsigned cache_pages, unsigned 
 void dvmDiscAddUser(DvmDisc* disc);
 void dvmDiscRemoveUser(DvmDisc* disc);
 
-static inline bool dvmDiscReadSectors(DvmDisc* disc, void* buffer, sec_t sectors, sec_t num_sectors)
+static inline bool dvmDiscReadSectors(DvmDisc* disc, void* buffer, sec_t first_sector, sec_t num_sectors)
 {
-	return disc->vt->read_sectors(disc, buffer, sectors, num_sectors);
+	return disc->vt->read_sectors(disc, buffer, first_sector, num_sectors, false);
 }
 
-static inline bool dvmDiscWriteSectors(DvmDisc* disc, const void* buffer, sec_t sectors, sec_t num_sectors)
+static inline bool dvmDiscWriteSectors(DvmDisc* disc, const void* buffer, sec_t first_sector, sec_t num_sectors)
 {
-	return disc->vt->write_sectors(disc, buffer, sectors, num_sectors);
+	return disc->vt->write_sectors(disc, buffer, first_sector, num_sectors, false);
 }
 
 static inline bool dvmDiscFlush(DvmDisc* disc)
