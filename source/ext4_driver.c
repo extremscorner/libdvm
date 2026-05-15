@@ -472,6 +472,12 @@ long _ext4_fpathconf_r(struct _reent* r, void* fd, int name)
 		case _PC_ALLOC_SIZE_MIN:
 			return ext4_sb_get_block_size(&vol->mp.fs.sb);
 
+		case _PC_REC_INCR_XFER_SIZE:
+			return disc->sector_sz;
+
+		case _PC_REC_MAX_XFER_SIZE:
+			return disc->sector_sz * UINT16_MAX;
+
 		case _PC_REC_MIN_XFER_SIZE:
 			return disc->block_sz ? disc->block_sz * disc->sector_sz : disc->sector_sz;
 
